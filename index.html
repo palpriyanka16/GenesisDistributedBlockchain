@@ -17,6 +17,9 @@
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
 
   <script src="vendor/jquery/jquery.min.js"></script>
+
+  <script src="js/index.js"></script>
+  
   <!-- <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css"> -->
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
@@ -132,8 +135,13 @@
                   <label for="inputTransPath">Transaction address</label>
                   <input type="text" id="inputTransPath" class="form-control" placeholder="Transaction Address" required autofocus><br>
                 </div>
-                <button class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2" type="submit">View Transaction</button>
+                <button id="viewTxBtn" class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2" data-toggle="collapse" data-target="#txDetails" type="submit">View Transaction</button>
             </form>
+            <div class="card collapse" id="txDetails">
+              <div class="card-header" id="txId">Transaction Id</div>
+              <div class="card-body" id="txContent">Transaction Data</div> 
+              <div class="card-footer" id="txSender">Trnsaction Sender</div>
+            </div>
           </p>
         </div>
       </div>
@@ -144,8 +152,11 @@
           <p class="lead mb-0">
             With a click on this button you can view all the blocks in the blockchain and by further clicking on any block you can view all the transactions in the block!
           </p><br>
-          <button class="btn btn-lg btn-success text-uppercase font-weight-bold mb-2" type="submit">SHOW BLOCKCHAIN</button>
+          <button id="viewBCBtn" class="btn btn-lg btn-success text-uppercase font-weight-bold mb-2" type="submit">SHOW BLOCKCHAIN</button>
+          <div id="blockChainDiv">
+          </div>
         </div>
+        
       </div>
     </div>
   </section>
