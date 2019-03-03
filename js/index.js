@@ -10,9 +10,11 @@ $(document).ready(function(){
 		
 	}
   });
+  
+
   $('#viewBCBtn').click(function() {
 
-  	//ajaz query to fetch all blockchain details
+  	//ajax query to fetch all blockchain details
 
   	var $table = $('<table class="table table-striped">');
 	var $tbody = $('<tbody>');
@@ -28,12 +30,12 @@ $(document).ready(function(){
 	$tr1.append($th3);
 	$tbody.append($tr1);
 
-	
-
 	$table.append($tbody);
+	
 	for (i = 1; i<= 4; i++){
+		
 	    var $tr = $('<tr>');
-	    var $td1 = $('<td>');
+	    var $td1 = $('<td style="cursor: pointer; color: blue;" data-toggle="modal" onclick="showModal()" data-target="#blockTxModal">');
 	    var $td2 = $('<td>');
 	    var $td3 = $('<td>');
 	    $td1.text(i);
@@ -48,4 +50,9 @@ $(document).ready(function(){
   });
 
 
+
 });
+
+function showModal() {
+	document.getElementById("modalTxContent").innerHTML = "Transactions";
+}
