@@ -104,7 +104,7 @@
         <div class="col-lg-6 order-lg-1 my-auto showcase-text">
           <h2>Add your transaction to the blockchain</h2>
           <p class="lead mb-0">
-            <form>
+            <form id="AddTxnForm">
                 <div class="form-label-group">
                   <label for="inputTransData">Data in transaction</label>
                   <input type="text" id="inputTransData" class="form-control" placeholder="Transaction Data" required autofocus><br>
@@ -120,7 +120,7 @@
                   <input type="text" id="inputPubKey" class="form-control" placeholder="Public Key" required> <br> 
                 </div><br><br>
                 
-                <button class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2" type="submit">Add Transaction</button>
+                <button class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2" id="AddTxnBtn" type="submit">Add Transaction</button>
               </form>
           </p>
         </div>
@@ -130,10 +130,12 @@
         <div class="col-lg-6 my-auto showcase-text">
           <h2>View your transaction</h2>
           <p class="lead mb-0">
-            <form>
+            <form id="ViewTxn">
                 <div class="form-label-group">
                   <label for="inputTransPath">Transaction address</label>
                   <input type="text" id="inputTransPath" class="form-control" placeholder="Transaction Address" required autofocus><br>
+                  <label for="inputBlockAddr">Block address</label>
+                  <input type="text" id="inputBlockAddr" class="form-control" placeholder="Block Address" required autofocus><br>
                 </div>
                 <button id="viewTxBtn" class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2" data-toggle="collapse" data-target="#txDetails" type="submit">View Transaction</button>
             </form>

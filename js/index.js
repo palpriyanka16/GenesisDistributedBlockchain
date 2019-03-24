@@ -10,6 +10,54 @@ $(document).ready(function(){
 		
 	}
   });
+
+  $("#AddTxnForm").submit(function(event) {
+	
+    event.preventDefault();
+    var sender = $('#inputPubKey').val();
+	var data = $('#inputTransData').val();
+	var signature = $('#inputDigiSign').val();
+	console.log(sender)
+    $.ajax({
+      method: "POST",
+      url: "http://localhost:8000/transaction",
+      contentType: 'application/json',
+      data: {
+    		"sender": sender,
+			"data": data,
+			"signature": signature 
+      },
+      success: function(result) {
+        console.log(result);
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+  });
+
+  $("#ViewTxn").submit(function(event) {
+	
+    event.preventDefault();
+    var txHash = $('#inputTransPath').val();
+    var blockHash = $('#inputBlockAddr').val();
+	
+    $.ajax({
+      method: "GET",
+      url: "http://localhost:8000/transaction",
+      contentType: 'application/json',
+      data: {
+    		"txHash": txHash ,
+			"blockHash": blockHash
+      },
+      success: function(result) {
+        console.log(result);
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+  });
   
 
   $('#viewBCBtn').click(function() {
