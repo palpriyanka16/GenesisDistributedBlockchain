@@ -38,7 +38,7 @@ First, get this project cloned to your local system using the following command 
      ./start.sh
   ```
 
-* Click on index.html to make use of the web interface in order to avail the different features provided by the backend services.
+* Open index.html in your browser to make use of the web interface in order to avail the different features provided by the backend services.
 
 
 ## Features
