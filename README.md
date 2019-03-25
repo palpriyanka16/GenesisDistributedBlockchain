@@ -97,42 +97,40 @@ First, get this project cloned to your local system using the following command 
       { 
         "status": "<response_status>",
         "data": [
-           { "block_hash": "<block_hash>",
+          { "block_hash": "<block_hash>",
             "block_number": "<block_number>",
             "nonce": "<nonce>","prev_block_hash": 
             "<previous_block_hash>",
-             "​​​transactions": {
+            "​​​transactions": {
                 "<txOneHash>": {
-                     "sender": "<sender_name>",
-                     "data": "<transaction_data>",
-                     "signature": "<digital_signature>"
-                 },
+                  "sender": "<sender_name>",
+                  "data": "<transaction_data>",
+                  "signature": "<digital_signature>"
+                },
                 "<txTwoHash>": {
-                     "sender": "<sender_name>",
-                     "data": "<transaction_data>",
-                     "signature": "<digital_signature>"
-                 },
-                 .....
-              }
-           },
-           { "block_hash": "<block_hash>",
+                  "sender": "<sender_name>",
+                  "data": "<transaction_data>",
+                  "signature": "<digital_signature>"
+                }
+            }
+          },
+          { "block_hash": "<block_hash>",
             "block_number": "<block_number>",
-            "nonce": "<nonce>",
-            "prev_block_hash": "<previous_block_hash>",
-             "​​​transactions": {
+            "nonce": "<nonce>","prev_block_hash": 
+            "<previous_block_hash>",
+            "​​​transactions": {
                 "<txOneHash>": {
-                     "sender": "<sender_name>",
-                     "data": "<transaction_data>",
-                     "signature": "<digital_signature>"
-                 },
+                  "sender": "<sender_name>",
+                  "data": "<transaction_data>",
+                  "signature": "<digital_signature>"
+                },
                 "<txTwoHash>": {
-                     "sender": "<sender_name>",
-                     "data": "<transaction_data>",
-                     "signature": "<digital_signature>"
-                 },
-                 .....
-           }
-           ......
+                  "sender": "<sender_name>",
+                  "data": "<transaction_data>",
+                  "signature": "<digital_signature>"
+                }
+            }
+          }
         ]
       }
    ```
