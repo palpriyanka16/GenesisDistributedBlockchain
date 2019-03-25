@@ -89,7 +89,7 @@ First, get this project cloned to your local system using the following command 
    ```
 * Retrieving the entire blockchain with all the blocks and transactions in each block
 
-   Route: `POST` [/block/all]()
+   Route: `GET` [/block/all]()
  
    Response:
 
