@@ -13,7 +13,6 @@ $(document).ready(function() {
         var sender = $("#inputPubKey").val();
         var data = $("#inputTransData").val();
         var signature = $("#inputDigiSign").val();
-        console.log(sender);
         $.ajax({
             method: "POST",
             url: "http://localhost:8000/transaction",
@@ -23,7 +22,7 @@ $(document).ready(function() {
                 signature: signature
             },
             success: function(result) {
-                console.log(result);
+                alert("Success");
             },
             error: function(error) {
                 console.log(error);
@@ -57,42 +56,59 @@ $(document).ready(function() {
 
     $("#viewBCBtn").click(function() {
         //ajax query to fetch all blockchain details
+        $.ajax({
+            method: "GET",
+            url: "http://localhost:8000/block/all",
+            success: function(result) {
+                console.log(result);
+                constructBlockChainTable(result.data);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
 
-        var $table = $('<table class="table table-striped">');
-        var $tbody = $("<tbody>");
-        var $tr1 = $("<tr>");
-        var $th1 = $("<th>");
-        var $th2 = $("<th>");
-        var $th3 = $("<th>");
-        $th1.text("Block hash");
-        $th2.text("Block height");
-        $th3.text("Block nonce");
-        $tr1.append($th1);
-        $tr1.append($th2);
-        $tr1.append($th3);
-        $tbody.append($tr1);
-
-        $table.append($tbody);
-
-        for (i = 1; i <= 4; i++) {
-            var $tr = $("<tr>");
-            var $td1 = $(
-                '<td style="cursor: pointer; color: blue;" data-toggle="modal" onclick="showModal()" data-target="#blockTxModal">'
-            );
-            var $td2 = $("<td>");
-            var $td3 = $("<td>");
-            $td1.text(i);
-            $td2.text(i);
-            $td3.text(i);
-            $tr.append($td1);
-            $tr.append($td2);
-            $tr.append($td3);
-            $tbody.append($tr);
+        function showModal(transactions) {
+            var content = `<table class="table table-striped table-responsive">
+                <tbody>
+                    <tr>
+                        <th>Data</th>
+                        <th>Signature</th>
+                        <th>Sender</th>
+                        <th>Hash</th>
+                    </tr>
+            `;
+            for (const [transactionHash, transaction] of Object.entries(transactions)) {
+                content += `<tr>
+                    <td>${transaction.data}</td>
+                    <td>${transaction.signature}</td>
+                    <td>${transaction.sender}</td>
+                    <td>${transactionHash}</td>
+                </tr>`;
+            }
+            content += `</tbody></table>`;
+            $("#modalTxContent").html(content);
         }
-        $("#blockChainDiv").html($table);
+
+        function constructBlockChainTable(blockChain) {
+            var $table = `<table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <th>Block hash</th>
+                        <th>Block height</th>
+                        <th>Block nonce</th>
+                    </tr>
+            `;
+
+            for (i = 0; i < blockChain.length; i++) {
+                $table += `<tr>
+                    <td style="cursor: pointer; color: blue;" data-toggle="modal" onclick="${showModal(blockChain[i].transactions)}" data-target="#blockTxModal">${blockChain[i].block_hash}</td>
+                    <td>${blockChain[i].block_number}</td>
+                    <td>${blockChain[i].nonce}</td>
+                </tr>
+                `;
+            }
+            $("#blockChainDiv").html($table);
+        }
     });
 });
-
-function showModal() {
-    document.getElementById("modalTxContent").innerHTML = "Transactions";
-}
