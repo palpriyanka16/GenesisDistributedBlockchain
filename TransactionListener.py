@@ -4,6 +4,8 @@ import json
 import falcon
 from wsgiref import simple_server
 
+from falcon_cors import CORS
+
 from Models import Transaction
 from Services.MiningService import MiningService
 from Services.ReaderService import ReaderService
@@ -41,11 +43,9 @@ class TransactionsHandler:
         resp.body = response
 
     def on_post(self, req, resp):
-        req_content = req.stream.read().decode('utf-8')
-        data = json.loads(req_content)  # Read the json data from the request content
-        sender = data['sender']
-        transaction_data = data['data']
-        signature = data['signature']
+        sender = req.params['sender']
+        transaction_data = req.params['data']
+        signature = req.params['signature']
         t = Transaction(sender, transaction_data, signature)
 
         validate_transaction(t)
@@ -70,7 +70,12 @@ class BlockChainHandler:
 
 
 # Instantiate Falcon API application
-api = falcon.API()
+cors_allow_all = CORS(allow_all_origins=True,
+                      allow_all_headers=True,
+                      allow_all_methods=True)
+
+api = falcon.API(middleware=[cors_allow_all.middleware])
+api.req_options.auto_parse_form_urlencoded = True
 api.add_route('/transaction', TransactionsHandler())
 api.add_route('/block/all', BlockChainHandler())
 

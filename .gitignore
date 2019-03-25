@@ -14,4 +14,4 @@ pip-delete-this-directory.txt
 # IDE specific
 .idea/
 
-Services/BlockChain/*
+BlockChain/*.json
