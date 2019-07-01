@@ -9,9 +9,9 @@ from random import randint
 class Transaction:
 
     def __init__(self, sender, data, signature):
-        self.sender = sender
+        self.sender = sender.strip()
         self.data = data
-        self.signature = signature
+        self.signature = signature.strip()
 
     def __str__(self):
         data_hash = sha256(self.data.encode()).hexdigest()
@@ -24,8 +24,8 @@ class Transaction:
 
     def verify(self):
         # The 'sender' is the PEM format of the sender's RSA public key
-        pubkey = rsa.PublicKey.load_pkcs1(self.sender)
-        data_hash = sha256(self.data.encode()).hexdigest()
+        pubkey = rsa.PublicKey.load_pkcs1(self.sender.encode())
+        data_hash = sha256(self.data.encode()).hexdigest().encode()
         signature = codecs.decode(self.signature.encode(), "hex") # hex to bytes conversion
 
         try:
