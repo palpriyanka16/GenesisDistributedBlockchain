@@ -1,6 +1,7 @@
 
 import rsa
 import codecs
+import hashlib
 
 privkey_file = input("Enter private key file name (.pem): ")
 
@@ -10,7 +11,9 @@ with open(privkey_file, "rb") as file:
 privkey = rsa.PrivateKey.load_pkcs1(privkey_file_contents)
 
 data = input("Enter data to be singed: ")
-signature = rsa.sign(data.encode(), privkey, 'SHA-256')
+data_hash = hashlib.sha256(data.encode()).hexdigest().encode()
+
+signature = rsa.sign(data_hash, privkey, 'SHA-256')
 signature_hex = codecs.encode(signature, 'hex').decode()
 
 print()
