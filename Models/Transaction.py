@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+import rsa
+import codecs
 from hashlib import sha256
 from random import randint
 
@@ -21,5 +23,13 @@ class Transaction:
         return transaction_hash
 
     def verify(self):
-        # TODO: Complete the verification logic for a transaction.
-        pass
+        # The 'sender' is the PEM format of the sender's RSA public key
+        pubkey = rsa.PublicKey.load_pkcs1(self.sender)
+        data_hash = sha256(self.data.encode()).hexdigest()
+        signature = codecs.decode(self.signature.encode(), "hex") # hex to bytes conversion
+
+        try:
+            rsa.verify(data_hash, signature, pubkey)
+            return True
+        except rsa.pkcs1.VerificationError:
+            return False
