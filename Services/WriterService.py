@@ -15,6 +15,20 @@ class WriterService:
             raise Exception("Singleton instance already exists. Use WriterService.get_instance() to get that instance.")
         WriterService.__instance = self
 
+        # The 'head_block_hash' file, if exists, stores the block hash of the head block.
+        # Check to see if the file exists, and if so, read the corresponding 
+        # block, and assign it to the head_block property
+        try:
+            with open("./BlockChain/head_block_hash") as f:
+                head_block_hash = f.read()
+
+            with open("./BlockChain/" + head_block_hash + ".json") as f:
+                block_json = json.loads(f.read())
+                self.head_block = Block.load_from_json(head_block_hash, block_json)
+
+        except FileNotFoundError:
+            pass
+
     @staticmethod
     def get_instance():
         if WriterService.__instance is None:
@@ -44,3 +58,8 @@ class WriterService:
             f.write(block_json)
 
         self.head_block = block
+        self.update_head_block_hash(block_hash)
+
+    def update_head_block_hash(self, block_hash):
+        with open("./BlockChain/head_block_hash", "w") as f:
+            f.write(block_hash)
