@@ -1,3 +1,6 @@
+
+from .Transaction import Transaction
+
 class Block:
 
     def __init__(self, block_number, prev_block_hash, transactions, nonce, block_hash):
@@ -21,6 +24,24 @@ class Block:
         t = str(block_number) + prev_block_hash + ''.join(str(e) for e in transaction_list)
         return t
 
+    @staticmethod
+    def load_from_json(block_hash, block_json):
+        # Creates a 'Block' from the block's JSON data
+        prev_block_hash = block_json['prev_block_hash']
+        block_number = block_json['block_number']
+        nonce = block_json['nonce']
+
+        transactions_dict = {}
+        for t in block_json['transactions']:
+            transaction_data = block_json['transactions'][t]
+            transaction = Transaction(transaction_data['sender'], 
+                                      transaction_data['data'], 
+                                      transaction_data['signature'])
+            transactions_dict[t] = transaction
+
+        block = Block(block_number, prev_block_hash, transactions_dict, nonce, block_hash)
+        return block
+
     def convert_to_dict(self):
         t = {
             'block_number': self.block_number,
@@ -34,3 +55,4 @@ class Block:
         t['block_hash'] = self.block_hash
 
         return t
+
