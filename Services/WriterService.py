@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 import json
+import sys
 import subprocess
 from Models import Block, Transaction
+from hdfs3 import HDFileSystem
 
 
 class WriterService:
@@ -33,6 +35,8 @@ class WriterService:
 
     def write(self, block_hash, block):
         file_for_block = block_hash + '.json'
+        
+
 
         # createFileCommand = 'hdfs dfs –touchz /BlockChain/' + file_for_block
         # createFileCommand = 'touch ./BlockChain/' + file_for_block
@@ -42,5 +46,13 @@ class WriterService:
 
         with open('./BlockChain/' + file_for_block, 'w') as f:  # writing JSON object
             f.write(block_json)
+
+        mode = sys.argv[1]
+
+        if mode == "hadoop":
+            hdfs = HDFileSystem(host='localhost', port=9000)
+            hdfs.touch('/user/BlockChain/' + file_for_block)
+            hdfs.put('./BlockChain/' + file_for_block, '/user/BlockChain/' + file_for_block)
+
 
         self.head_block = block
