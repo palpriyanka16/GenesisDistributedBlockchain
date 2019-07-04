@@ -3,11 +3,11 @@ import sys
 from Services.WriterService import WriterService
 from hdfs3 import HDFileSystem
 
-mode = sys.argv[1]
 
 class ReaderService:
     __instance = None
     writer_service = WriterService.get_instance()
+
 
     def __init__(self):
         if ReaderService.__instance is not None:
@@ -20,17 +20,28 @@ class ReaderService:
             return ReaderService()
         return ReaderService.__instance
 
+    def read_from_local(self, block_hash):
+        block_file_path = self.writer_service.config['LOCAL_PATH'] + block_hash + ".json"
+        with open(block_file_path, "r") as read_file:
+            data = json.load(read_file)
+        return data
+
+
+    def read_from_hdfs(self, block_hash):
+        hdfs = HDFileSystem(host = self.writer_service.config['HDFS_HOST'], port = self.writer_service.config['HDFS_PORT'])
+        block_file_path = self.writer_service.config['HDFS_PATH'] + block_hash + ".json"
+        with hdfs.open(block_file_path) as read_file:
+            data = json.load(read_file)
+        return data
+
     def read_transaction(self, block_file_path, transaction_hash):
         # might be replaced by a hdfs command to read file
+        mode = self.writer_service.config['MODE']
+
         if mode == "local":
-            block_file_path = './BlockChain/' + block_file_path + ".json"
-            with open(block_file_path, "r") as read_file:
-                data = json.load(read_file)
+            data = self.read_from_local(block_file_path)
         elif mode == "hadoop":
-            hdfs = HDFileSystem(host='localhost', port=9000)
-            block_file_path = '/user/BlockChain/' + block_file_path + ".json"
-            with hdfs.open(block_file_path) as read_file:
-                data = json.load(read_file)
+            data = self.read_from_hdfs(block_file_path)
        
 
         transaction = data['transactions'][transaction_hash]
@@ -41,15 +52,12 @@ class ReaderService:
 
     def read_block(self, block_hash):
         
+        mode = self.writer_service.config['MODE']
+
         if mode == "local":
-            block_file_path = './BlockChain/' + block_hash + ".json"
-            with open(block_file_path, "r") as read_file:
-                block = json.load(read_file)
+            block = self.read_from_local(block_hash)
         elif mode == "hadoop":
-            hdfs = HDFileSystem(host='localhost', port=9000)
-            block_file_path = '/user/BlockChain/' + block_hash + ".json"
-            with hdfs.open(block_file_path) as read_file:
-               block = json.load(read_file)
+            block = self.read_from_hdfs(block_hash)
 
 
         return block
