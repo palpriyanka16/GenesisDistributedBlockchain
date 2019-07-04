@@ -4,4 +4,4 @@
 rm BlockChain/*.json
 
 # start listening
-python3 -m TransactionListener hadoop
+python3 -m TransactionListener
