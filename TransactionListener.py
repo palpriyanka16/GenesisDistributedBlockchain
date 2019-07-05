@@ -11,11 +11,13 @@ from Services.ForwardingService import ForwardingService
 from Services.MiningService import MiningService
 from Services.ReaderService import ReaderService
 from Services.WriterService import WriterService
+from Services.TransactionsPoolingService import TransactionsPoolingService
 
 forwarding_service = ForwardingService.get_instance()
 mining_service = MiningService.get_instance()
 reader_service = ReaderService.get_instance()
 writer_service = WriterService.get_instance()
+transaction_pooling_service = TransactionsPoolingService.get_instance()
 
 unmined_transactions = []
 
@@ -96,6 +98,15 @@ class BlocksHandler:
             resp.body = response
 
 
+# Read the complete Blockchain, if it exists
+block_chain = reader_service.read_block_chain()
+
+# Add each transaction ID to the transaction pooling service
+for block in block_chain:
+    block_number = block['block_number']
+    for transaction in block['transactions']:
+        transaction_pooling_service.add_transaction(transaction, block_number)
+
 # Instantiate Falcon API application
 cors_allow_all = CORS(allow_all_origins=True,
                       allow_all_headers=True,
@@ -108,5 +119,5 @@ api.add_route('/block/all', BlockChainHandler())
 api.add_route('/block', BlocksHandler())
 
 httpd = simple_server.make_server('127.0.0.1', 8000, api)
-print("Listening in http://localhost:8000...")
+print("Listening for newer transactions on http://localhost:8000/transaction")
 httpd.serve_forever()
