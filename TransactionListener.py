@@ -17,18 +17,32 @@ writer_service = WriterService.get_instance()
 reader_service = ReaderService.get_instance()
 transaction_pooling_service = TransactionsPoolingService.get_instance()
 
-unmined_transactions = []
 
-
-# function to check if the transaction already exists in the unmined pool or
-# other validations regarding the conventions defined for a transaction
 def validate_transaction(transaction):
-    pass
+    '''
+        Function to check if the transaction already exists with this node, 
+        either mined or unmined; also checks if the transaction has a
+        valid signature.
+        Returns true or false accordingly.
+    '''
 
+    # Check if it is a new transaction
+    if not transaction_pooling_service.is_new_transaction(transaction):
+        print("Duplicate transaction: {}".format(transaction.get_id()))
+        return False
+
+    # Check if the signature is valid
+    if not transaction.verify():
+        print("Invalid transaction: {}".format(transaction.get_id()))
+        return False
+    return True
 
 def mine_transactions():
+    unmined_transactions = transaction_pooling_service.unmined_transactions
+
     if len(unmined_transactions) >= MiningService.TRANSACTIONS_PER_BLOCK:
-        mining_service.mine(unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK])
+        transactions_to_mine = unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
+        mining_service.mine(transactions_to_mine)
         del unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
 
 
@@ -50,16 +64,16 @@ class TransactionsHandler:
         signature = req.params['signature']
         t = Transaction(sender, transaction_data, signature)
 
-        validate_transaction(t)
+        if validate_transaction(t):
+            # Add the transaction to the unmined transactions list
+            transaction_pooling_service.unmined_transactions.append(t)
+            mine_transactions()
+            response = {'status': 'Success'}
+        else:
+            response = {'status': 'Failed'}
 
-        unmined_transactions.append(t)  # Add the transaction to the unmined transaction pool
-
-        mine_transactions()
-
-        response = {'status': 'success'}
         response = json.dumps(response)
         resp.body = response
-
 
 class BlockChainHandler:
 
@@ -78,7 +92,7 @@ block_chain = reader_service.read_block_chain()
 for block in block_chain:
     block_number = block['block_number']
     for transaction in block['transactions']:
-        transaction_pooling_service.add_transaction(transaction, block_number)
+        transaction_pooling_service.add_mined_transaction(transaction, block_number)
 
 # Instantiate Falcon API application
 cors_allow_all = CORS(allow_all_origins=True,
@@ -91,5 +105,5 @@ api.add_route('/transaction', TransactionsHandler())
 api.add_route('/block/all', BlockChainHandler())
 
 httpd = simple_server.make_server('127.0.0.1', 8000, api)
-print("Listening for transactions ...")
+print("Listening for newer transactions ...")
 httpd.serve_forever()
