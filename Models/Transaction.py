@@ -16,10 +16,10 @@ class Transaction:
         return "Sender: {} \nData: {}\n".format(self.sender, data_hash)
     
     def get_id(self):
-        t = self.sender + self.data + self.signature + str(randint(1, 3000))
+        t = self.sender + self.data + self.signature
         transaction_hash = sha256(t.encode()).hexdigest()
         return transaction_hash
 
     def verify(self):
         # TODO: Complete the verification logic for a transaction.
-        pass
+        return True
