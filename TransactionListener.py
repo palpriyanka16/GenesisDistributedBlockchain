@@ -7,13 +7,15 @@ from wsgiref import simple_server
 from falcon_cors import CORS
 
 from Models import Block, Transaction
+from Services.ForwardingService import ForwardingService
 from Services.MiningService import MiningService
 from Services.ReaderService import ReaderService
 from Services.WriterService import WriterService
 
+forwarding_service = ForwardingService.get_instance()
 mining_service = MiningService.get_instance()
-writer_service = WriterService.get_instance()
 reader_service = ReaderService.get_instance()
+writer_service = WriterService.get_instance()
 
 unmined_transactions = []
 
@@ -88,6 +90,7 @@ class BlocksHandler:
             resp.body = response
         else:
             writer_service.write(new_block.block_hash, new_block)
+
             response = {'status': 'success'}
             response = json.dumps(response)
             resp.body = response
