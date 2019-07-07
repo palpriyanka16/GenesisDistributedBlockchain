@@ -16,6 +16,7 @@ pip-delete-this-directory.txt
 
 # Blockchain files
 BlockChain/*.json
+BlockChain/head_block_hash
 
 #config
 config.json 

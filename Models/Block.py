@@ -25,9 +25,10 @@ class Block:
         return t
 
     @staticmethod
-    def load_from_json(block_hash, block_json):
+    def load_from_json(block_json):
         # Creates a 'Block' from the block's JSON data
         prev_block_hash = block_json['prev_block_hash']
+        block_hash = block_json['block_hash']
         block_number = block_json['block_number']
         nonce = block_json['nonce']
 
