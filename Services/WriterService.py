@@ -30,7 +30,7 @@ class WriterService:
 
             with open("./BlockChain/" + head_block_hash + ".json") as f:
                 block_json = json.loads(f.read())
-                self.head_block = Block.load_from_json(head_block_hash, block_json)
+                self.head_block = Block.load_from_json(block_json)
 
         except FileNotFoundError:
             pass
