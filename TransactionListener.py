@@ -80,5 +80,5 @@ api.add_route('/transaction', TransactionsHandler())
 api.add_route('/block/all', BlockChainHandler())
 
 httpd = simple_server.make_server('127.0.0.1', 8000, api)
-print("Listening for transactions ...")
+print("Listening in http://localhost:8000...")
 httpd.serve_forever()
