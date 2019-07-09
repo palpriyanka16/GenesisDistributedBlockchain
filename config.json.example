@@ -1,7 +1,8 @@
 {
-	"MODE": "",
-	"LOCAL_PATH": "",
+	"MODE": "local",
+	"LOCAL_PATH": "./BlockChain/",
 	"HDFS_PATH": "",
-	"HDFS_HOST": "",
-	"HDFS_PORT": 
+	"HDFS_HOST": "localhost",
+	"HDFS_PORT": 8020
 }
+
