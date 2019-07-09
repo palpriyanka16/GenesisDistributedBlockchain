@@ -4,7 +4,7 @@ import json
 import sys
 import subprocess
 from Models import Block, Transaction
-from hdfs3 import HDFileSystem
+
 
 
 class WriterService:
@@ -56,9 +56,15 @@ class WriterService:
             f.write(block_json)
 
     def write_to_hdfs(self, file_for_block):
-        hdfs = HDFileSystem(host = self.config['HDFS_HOST'], port = self.config['HDFS_PORT'])
-        hdfs.touch(self.config['HDFS_PATH'] + file_for_block)
-        hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block)
+        try:
+            from hdfs3 import HDFileSystem    
+            hdfs = HDFileSystem(host = self.config['HDFS_HOST'], port = self.config['HDFS_PORT'])
+            hdfs.touch(self.config['HDFS_PATH'] + file_for_block)
+            hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block)
+        except ImportError:
+            print("hdfs3 module not found")
+        except:
+            print("Error occured in connecting to hadoop")
 
 
     def write(self, block_hash, block):

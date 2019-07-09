@@ -1,7 +1,7 @@
 import json
 import sys
 from Services.WriterService import WriterService
-from hdfs3 import HDFileSystem
+
 
 
 class ReaderService:
@@ -28,11 +28,18 @@ class ReaderService:
 
 
     def read_from_hdfs(self, block_hash):
-        hdfs = HDFileSystem(host = self.writer_service.config['HDFS_HOST'], port = self.writer_service.config['HDFS_PORT'])
-        block_file_path = self.writer_service.config['HDFS_PATH'] + block_hash + ".json"
-        with hdfs.open(block_file_path) as read_file:
-            data = json.load(read_file)
-        return data
+        try:
+            from hdfs3 import HDFileSystem
+            hdfs = HDFileSystem(host = self.writer_service.config['HDFS_HOST'], port = self.writer_service.config['HDFS_PORT'])
+            block_file_path = self.writer_service.config['HDFS_PATH'] + block_hash + ".json"
+            with hdfs.open(block_file_path) as read_file:
+                data = json.load(read_file)
+            return data
+        except ImportError:
+            print("hdfs3 module not found")
+        except:
+            print("Error in connecting to hadoop")
+
 
     def read_transaction(self, block_file_path, transaction_hash):
         # might be replaced by a hdfs command to read file
