@@ -26,4 +26,12 @@ class NetworkService:
         block_dict = block.convert_to_dict()
         for i in self.PEERS_ADDRESS:
             url = "http://{}/block".format(i)
-            requests.post(url=url, data={'block_data': json.dumps(block_dict)})
+            print("Sending block to " + url)
+            requests.post(url=url, json=block_dict)
+
+    def broadcast_transaction(self, transaction):
+        transaction_dict = transaction.convert_to_dict()
+        for i in self.PEERS_ADDRESS:
+            url = "http://{}/transaction".format(i)
+            print("Sending transaction to " + url)
+            requests.post(url, data=transaction_dict) # TODO: Change from 'data' to 'json' parameter
