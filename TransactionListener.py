@@ -7,13 +7,13 @@ from wsgiref import simple_server
 from falcon_cors import CORS
 
 from Models import Block, Transaction
-from Services.ForwardingService import ForwardingService
+from Services.NetworkService import NetworkService
 from Services.MiningService import MiningService
 from Services.ReaderService import ReaderService
 from Services.WriterService import WriterService
 from Services.TransactionsPoolingService import TransactionsPoolingService
 
-forwarding_service = ForwardingService.get_instance()
+network_service = NetworkService.get_instance()
 mining_service = MiningService.get_instance()
 reader_service = ReaderService.get_instance()
 writer_service = WriterService.get_instance()
