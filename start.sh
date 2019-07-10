@@ -14,4 +14,10 @@ while [ ! $# -eq 0 ]; do
 done
 
 # start listening
-python3 -m TransactionListener
+
+PORT=8000
+NUM_THREADS=3
+NUM_WORKERS=1
+
+gunicorn -w $NUM_WORKERS --threads $NUM_THREADS -b 0.0.0.0:$PORT TransactionListener:api \
+		 --reload --capture-output --reuse-port --timeout 90
