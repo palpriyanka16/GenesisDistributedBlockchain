@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 
 import requests
-
+import json
 
 class NetworkService:
     __instance = None
 
-    PEERS_ADDRESS = []
+    PEERS_ADDRESS = []     # list of "host:port"
 
     def __init__(self):
         if NetworkService.__instance is not None:
@@ -18,26 +18,12 @@ class NetworkService:
         if NetworkService.__instance is None:
             return NetworkService()
         return NetworkService.__instance
-
-    #function to send the block to peers of the current node
-    def broadcast_block(self, block_json):
-
-        # TODO: Need to find a way to just send a request and not care about the response
-        # at all. The below commented hack works but throws certain response related
-        # exceptions
-        #
-        #
-        # for peer_address in self.PEERS_ADDRESS:
-        #     try:
-        #         rs = requests.post(url = peer_address, data = {'block_data': block_json}, timeout = 0.00001)
-        #     except requests.exceptions.ReadTimeout: #this confirms you that the request has reached server
-        #         pass
-        #
-        #
-        # The need for above solution is because, if a cycle of requests form in the network
-        # there will be a deadlock with each node in the cycle waiting for the next node to return
-        # a response. The below code WILL ONLY WORK in deadlock free scenarios. Replace the code below
-        # with the code snippet in the comment to see the working!
-        for peer_address in self.PEERS_ADDRESS:
-            rs = requests.post(url = peer_address, data = {'block_data': block_json})
-
+    
+    def broadcast_block(self, block):
+        '''
+            Function to send a mined block to peers of the current node
+        '''
+        block_dict = block.convert_to_dict()
+        for i in self.PEERS_ADDRESS:
+            url = "http://{}/block".format(i)
+            requests.post(url=url, data={'block_data': json.dumps(block_dict)})
