@@ -40,3 +40,10 @@ class Transaction:
             return True
         except rsa.pkcs1.VerificationError:
             return False
+
+    def convert_to_dict(self):
+        t = {}
+        t['sender'] = self.sender
+        t['data'] = self.data
+        t['signature'] = self.signature
+        return t
