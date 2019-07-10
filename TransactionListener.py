@@ -82,6 +82,7 @@ class TransactionsHandler:
         resp.body = response
 
     def on_post(self, req, resp):
+        # TODO: Change the input data format to be 'json', see BlocksHandler
         sender = req.params['sender']
         transaction_data = req.params['data']
         signature = req.params['signature']
@@ -90,6 +91,7 @@ class TransactionsHandler:
         if validate_transaction(t):
             # Add the transaction to the unmined transactions list
             transaction_pooling_service.unmined_transactions.append(t)
+            network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
         else:
@@ -111,7 +113,8 @@ class BlockChainHandler:
 class BlocksHandler:
 
     def on_post(self, req, resp):
-        new_block_json = json.loads(req.params['block_data'])
+        t = req.stream.read().decode()
+        new_block_json = json.loads(t)
         new_block = Block.load_from_json(new_block_json)
 
         if validate_block(new_block):
