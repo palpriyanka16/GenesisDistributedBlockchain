@@ -3,21 +3,21 @@
 import requests
 
 
-class ForwardingService:
+class NetworkService:
     __instance = None
 
     PEERS_ADDRESS = []
 
     def __init__(self):
-        if ForwardingService.__instance is not None:
-            raise Exception("Singleton instance already exists. Use ForwardingService.get_instance() to get that instance.")
-        ForwardingService.__instance = self
+        if NetworkService.__instance is not None:
+            raise Exception("Singleton instance already exists. Use NetworkService.get_instance() to get that instance.")
+        NetworkService.__instance = self
 
     @staticmethod
     def get_instance():
-        if ForwardingService.__instance is None:
-            return ForwardingService()
-        return ForwardingService.__instance
+        if NetworkService.__instance is None:
+            return NetworkService()
+        return NetworkService.__instance
 
     #function to send the block to peers of the current node
     def forward_block_json_to_peers(self, block_json):

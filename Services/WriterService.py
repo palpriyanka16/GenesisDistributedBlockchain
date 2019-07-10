@@ -4,7 +4,7 @@ import json
 import sys
 import subprocess
 from Models import Block, Transaction
-from Services.ForwardingService import ForwardingService
+from Services.NetworkService import NetworkService
 
 
 
@@ -13,7 +13,7 @@ class WriterService:
     head_block = None
     DEFAULT_PREV_HASH = ""
     config = None
-    forwarding_service = ForwardingService.get_instance()
+    network_service = NetworkService.get_instance()
 
     def __init__(self):
         if WriterService.__instance is not None:
@@ -85,7 +85,7 @@ class WriterService:
 
         self.head_block = block
         self.update_head_block_hash(block_hash)
-        self.forwarding_service.forward_block_json_to_peers(block_json)
+        self.network_service.forward_block_json_to_peers(block_json)
 
     def update_head_block_hash(self, block_hash):
         with open("./BlockChain/head_block_hash", "w") as f:
