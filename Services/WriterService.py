@@ -85,7 +85,7 @@ class WriterService:
 
         self.head_block = block
         self.update_head_block_hash(block_hash)
-        self.network_service.forward_block_json_to_peers(block_json)
+        self.network_service.broadcast_block(block_json)
 
     def update_head_block_hash(self, block_hash):
         with open("./BlockChain/head_block_hash", "w") as f:

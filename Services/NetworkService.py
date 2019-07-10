@@ -20,7 +20,7 @@ class NetworkService:
         return NetworkService.__instance
 
     #function to send the block to peers of the current node
-    def forward_block_json_to_peers(self, block_json):
+    def broadcast_block(self, block_json):
 
         # TODO: Need to find a way to just send a request and not care about the response
         # at all. The below commented hack works but throws certain response related
@@ -40,3 +40,4 @@ class NetworkService:
         # with the code snippet in the comment to see the working!
         for peer_address in self.PEERS_ADDRESS:
             rs = requests.post(url = peer_address, data = {'block_data': block_json})
+
