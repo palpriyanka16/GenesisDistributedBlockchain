@@ -41,7 +41,23 @@ def validate_transaction(transaction):
 
 # function to verify and signatures and hashes for transactions and block data
 def validate_block(block):
-    pass
+    transactions_list = []
+    for transaction in block.transactions.values():
+        transactions_list.append(transaction)
+    block_data_without_nonce = Block.block_data_without_nonce(block.block_number, block.prev_block_hash, transactions_list)
+    block_data = block_data_without_nonce + str(block.nonce)
+    block_data_hash = md5(block_data.encode()).hexdigest()
+    
+    if not mining_service.__satisfies_difficulty(block_data_hash):
+        print("Nonce of the block does not meet mining criteria")
+        return False
+
+    for transaction in block.transactions.values():
+        if not transaction.verify():
+            print("Transaction with an invalid signature encountered")
+            return False
+
+    return True
 
 
 def mine_transactions():
@@ -98,18 +114,19 @@ class BlocksHandler:
         new_block_json = json.loads(req.params['block_data'])
         new_block = Block.load_from_json(new_block_json)
 
-        validate_block(new_block)
+        if validate_block(new_block):
+            if writer_service.get_head_block_number() + 1 != new_block.block_number:
+                response = {'status': 'failure', 'message': 'Invalid block number.'}
+                response = json.dumps(response)
+                resp.body = response
+            else:
+                writer_service.write(new_block.block_hash, new_block)
 
-        if writer_service.get_head_block_number() + 1 != new_block.block_number:
-            response = {'status': 'failure', 'message': 'Invalid block number.'}
-            response = json.dumps(response)
-            resp.body = response
+                response = {'status': 'success'}
+                response = json.dumps(response)
+                resp.body = response
         else:
-            writer_service.write(new_block.block_hash, new_block)
-
-            response = {'status': 'success'}
-            response = json.dumps(response)
-            resp.body = response
+            print("Received block is invalid")
 
 
 # Read the complete Blockchain, if it exists
