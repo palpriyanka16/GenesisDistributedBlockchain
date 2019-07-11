@@ -1,4 +1,6 @@
 from hashlib import md5
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 from Models import Block
 from Services.WriterService import WriterService

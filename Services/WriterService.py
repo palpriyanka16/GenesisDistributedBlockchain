@@ -6,6 +6,8 @@ import subprocess
 from Models import Block, Transaction
 from Services.NetworkService import NetworkService
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 
 class WriterService:
