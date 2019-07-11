@@ -1,5 +1,8 @@
 import json
 import sys
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from Services.WriterService import WriterService
 
 

@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import json
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import falcon
 from wsgiref import simple_server
@@ -28,15 +30,17 @@ def validate_transaction(transaction):
         Returns true or false accordingly.
     '''
 
+    logging.info("Transaction is being validated")
     # Check if it is a new transaction
     if not transaction_pooling_service.is_new_transaction(transaction):
-        print("Duplicate transaction: {}".format(transaction.get_id()))
+        logging.error("Duplicate transaction: {}".format(transaction.get_id()))
         return False
 
     # Check if the signature is valid
     if not transaction.verify():
-        print("Invalid transaction: {}".format(transaction.get_id()))
+        logging.error("Invalid transaction: {}".format(transaction.get_id()))
         return False
+    logging.info("Transaction validated successfully")
     return True
 
 # function to verify and signatures and hashes for transactions and block data
@@ -67,6 +71,7 @@ def mine_transactions():
         transactions_to_mine = unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
         mining_service.mine(transactions_to_mine)
         del unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
+        logging.info("Transaction has been mined")
 
 
 class TransactionsHandler:
@@ -94,7 +99,9 @@ class TransactionsHandler:
             network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
+            logging.info("Received Transaction has been added to unmined transactions")
         else:
+            logging.error("Failed to receive transaction")
             response = {'status': 'Failed'}
 
         response = json.dumps(response)
