@@ -45,6 +45,7 @@ def validate_transaction(transaction):
 
 # function to verify and signatures and hashes for transactions and block data
 def validate_block(block):
+    logging.info("Validating block...")
     transactions_list = []
     for transaction in block.transactions.values():
         transactions_list.append(transaction)
@@ -53,14 +54,14 @@ def validate_block(block):
     block_data_hash = md5(block_data.encode()).hexdigest()
     
     if not mining_service.__satisfies_difficulty(block_data_hash):
-        print("Nonce of the block does not meet mining criteria")
+        logging.error("Nonce of the block does not meet mining criteria")
         return False
 
     for transaction in block.transactions.values():
         if not transaction.verify():
-            print("Transaction with an invalid signature encountered")
+            logging.error("Transaction with an invalid signature encountered")
             return False
-
+    logging.info("Block validated successfully")
     return True
 
 
@@ -79,7 +80,7 @@ class TransactionsHandler:
     def on_get(self, req, resp):
         blockHash = req.get_param("blockHash")
         txHash = req.get_param("txHash")
-
+        logging.info("Searching for transaction "+ txHash + " in  block " + blockHash)
         transaction = reader_service.read_transaction(blockHash, txHash)
 
         response = {'status': 'success', 'data': transaction} ## response will contain the transaction json also
@@ -92,16 +93,15 @@ class TransactionsHandler:
         transaction_data = req.params['data']
         signature = req.params['signature']
         t = Transaction(sender, transaction_data, signature)
-
         if validate_transaction(t):
             # Add the transaction to the unmined transactions list
             transaction_pooling_service.unmined_transactions.append(t)
+            logging.info("Received Transaction has been added to unmined transactions")
             network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
-            logging.info("Received Transaction has been added to unmined transactions")
+
         else:
-            logging.error("Failed to receive transaction")
             response = {'status': 'Failed'}
 
         response = json.dumps(response)
@@ -123,12 +123,13 @@ class BlocksHandler:
         t = req.stream.read().decode()
         new_block_json = json.loads(t)
         new_block = Block.load_from_json(new_block_json)
-
+        logging.info("Received new block")
         if validate_block(new_block):
             if writer_service.get_head_block_number() + 1 != new_block.block_number:
                 response = {'status': 'failure', 'message': 'Invalid block number.'}
                 response = json.dumps(response)
                 resp.body = response
+                logging.error("Expecting block number "+ str(writer_service.get_head_block_number() + 1) + " given " + str(new_block.block_number ))
             else:
                 writer_service.write(new_block.block_hash, new_block)
 
@@ -136,7 +137,7 @@ class BlocksHandler:
                 response = json.dumps(response)
                 resp.body = response
         else:
-            print("Received block is invalid")
+            logging.error("Received block is invalid")
 
 
 # Read the complete Blockchain, if it exists

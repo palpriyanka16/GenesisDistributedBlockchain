@@ -66,12 +66,13 @@ class WriterService:
             hdfs.touch(self.config['HDFS_PATH'] + file_for_block)
             hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block)
         except ImportError:
-            print("hdfs3 module not found")
+            logging.error("hdfs3 module not found")
         except:
-            print("Error occured in connecting to hadoop")
+            logging.error("Error occured in connecting to hadoop")
 
 
     def write(self, block_hash, block):
+        logging.info("Writing blocks into Blockchain")
         file_for_block = block_hash + '.json'
         
 
@@ -80,7 +81,7 @@ class WriterService:
         self.write_to_local(block_json, file_for_block)
 
         mode = self.config['MODE']
-        print("Mode: " + mode)
+        logging.info("Mode: " + mode)
 
         if mode == "hadoop":
             self.write_to_hdfs(file_for_block)

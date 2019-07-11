@@ -39,9 +39,9 @@ class ReaderService:
                 data = json.load(read_file)
             return data
         except ImportError:
-            print("hdfs3 module not found")
+            logging.error("hdfs3 module not found")
         except:
-            print("Error in connecting to hadoop")
+            logging.error("Error in connecting to hadoop")
 
 
     def read_transaction(self, block_file_path, transaction_hash):
@@ -55,13 +55,12 @@ class ReaderService:
        
 
         transaction = data['transactions'][transaction_hash]
-        print("Transaction read from the blockchain:")
-        print(transaction)
+        logging.info("Transaction read from the blockchain:")
+        logging.info(transaction)
 
         return transaction
 
     def read_block(self, block_hash):
-        
         mode = self.writer_service.config['MODE']
 
         if mode == "local":
@@ -73,6 +72,7 @@ class ReaderService:
         return block
 
     def read_block_chain(self):
+        logging.info("Blockchain is being read")
         head_block_hash = self.writer_service.get_head_block_hash()
         current_block_hash = head_block_hash
 

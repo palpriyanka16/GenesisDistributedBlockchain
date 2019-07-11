@@ -51,12 +51,16 @@ class MiningService:
             transactions[t.get_id()] = t
 
         nonce = 0
+        logging.info("Mining block : " + block_number)
         while nonce < self.__max_nonce:
             block_data = block_data_without_nonce + str(nonce)
             block_data_hash = md5(block_data.encode()).hexdigest()
             if self.__satisfies_difficulty(block_data_hash):
-                print(bin(int(block_data_hash, 16))[2:].zfill(len(block_data_hash) * 4))
+                logging.info("Block "+ block_number+" mined with nonce "+ nonce +" : ")
+
+                #print(bin(int(block_data_hash, 16))[2:].zfill(len(block_data_hash) * 4))
                 block = Block(block_number, prev_block_hash, transactions, nonce, block_data_hash)
+                logging.info(block.convert_to_dict())
                 self.writer_service.write(block_data_hash, block)
                 break
             nonce += 1
