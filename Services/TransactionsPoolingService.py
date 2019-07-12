@@ -71,6 +71,17 @@ class TransactionsPoolingService:
                 return True
         return False
 
+    def delete_unmined_transaction_if_exists(self, transaction):
+        if not isinstance(transaction, Transaction):
+            raise TypeError("Expected argument type 'Transaction'")
+        
+        transaction_id = transaction.get_id()
+
+        for (i, v) in enumerate(self.unmined_transactions):
+            if v.get_id() == transaction_id:
+                del self.unmined_transactions[i]
+                return
+
     def is_new_transaction(self, transaction):
         if not self.is_mined_transaction(transaction) and not self.is_unmined_transaction(transaction):
             return True
