@@ -5,17 +5,19 @@ import sys
 import subprocess
 from Models import Block, Transaction
 from Services.NetworkService import NetworkService
+from Services.TransactionsPoolingService import TransactionsPoolingService
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+network_service = NetworkService.get_instance()
+transactions_pooling_service = TransactionsPoolingService.get_instance()
 
 class WriterService:
     __instance = None
     head_block = None
     DEFAULT_PREV_HASH = ""
     config = None
-    network_service = NetworkService.get_instance()
 
     def __init__(self):
         if WriterService.__instance is not None:
@@ -74,7 +76,12 @@ class WriterService:
     def write(self, block_hash, block):
         logging.info("Writing blocks into Blockchain")
         file_for_block = block_hash + '.json'
-        
+
+        # Add/delete transactions from the Transaction Pool appropriately
+        for i in block.transactions:
+            transaction = block.transactions[i]
+            transactions_pooling_service.delete_unmined_transaction_if_exists(transaction)
+            transactions_pooling_service.add_mined_transaction(transaction, block.block_number)
 
         block_json = json.dumps(block.convert_to_dict())
 
@@ -88,7 +95,7 @@ class WriterService:
 
         self.head_block = block
         self.update_head_block_hash(block_hash)
-        self.network_service.broadcast_block(block)
+        network_service.broadcast_block(block)
 
     def update_head_block_hash(self, block_hash):
         with open("./BlockChain/head_block_hash", "w") as f:
