@@ -11,6 +11,7 @@ class NetworkService:
     __instance = None
 
     PEERS_ADDRESS = []     # list of "host:port" e.g. "194.56.23.57:5000"
+    MY_ADDRESS = "localhost:8000"       # TODO: Fetch this address from config file
 
     def __init__(self):
         if NetworkService.__instance is not None:
@@ -28,10 +29,14 @@ class NetworkService:
             Function to send a mined block to peers of the current node
         '''
         block_dict = block.convert_to_dict()
+        data = {
+            "sender": self.MY_ADDRESS,
+            "block": block_dict
+        }
         for i in self.PEERS_ADDRESS:
             url = "http://{}/block".format(i)
             logging.info("Sending block to " + url)
-            requests.post(url=url, json=block_dict)
+            requests.post(url=url, json=data)
 
     def broadcast_transaction(self, transaction):
         '''
