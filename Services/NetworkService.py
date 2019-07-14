@@ -5,6 +5,8 @@ import json
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+from Models import Block
+
 class NetworkService:
     __instance = None
 
@@ -40,3 +42,16 @@ class NetworkService:
             url = "http://{}/transaction".format(i)
             logging.info("Sending transaction to " + url)
             requests.post(url, data=transaction_dict)
+
+    def fetch_blockchain_from(self, target_peer):
+        url = "http://{}/block/all".format(target_peer)
+        logging.info("Fetching blockchain from " + url)
+        response = requests.get(url=url)
+        blockchain_json = response.json()['data']
+
+        blockchain = []
+        for block_json in blockchain_json:
+            block = Block.load_from_json(block_json)
+            blockchain.append(block)
+
+        return blockchain

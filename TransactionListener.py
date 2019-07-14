@@ -66,6 +66,16 @@ def validate_block(block):
     return True
 
 
+# function to validate only the new blocks to check if it can be appended to
+# the existing blockchain
+def validate_new_block_header(block):
+    if writer_service.get_head_block_number() + 1 != block.block_number:
+        return False
+    if writer_service.get_head_block_hash() != block.prev_block_hash:
+        return False
+    return True
+
+
 def mine_transactions():
     unmined_transactions = transaction_pooling_service.unmined_transactions
 
@@ -107,6 +117,7 @@ class TransactionsHandler:
         response = json.dumps(response)
         resp.body = response
 
+
 class BlockChainHandler:
 
     def on_get(self, req, resp):
@@ -117,27 +128,39 @@ class BlockChainHandler:
         resp.body = response
 
 
+def validate_and_insert_block(block, sender):
+    if validate_new_block_header(block):
+        if validate_block(block):
+            writer_service.write(block.block_hash, block)
+        else:
+            logging.error("Received block is invalid")
+    elif block.block_number > writer_service.get_head_block_number():
+        new_blockchain = network_service.fetch_blockchain_from(sender)
+
+        writer_service.remove_existing_blockchain()
+        for block in new_blockchain:
+            print("block number : " + str(block.block_number))
+            validate_and_insert_block(block, sender)
+    else:
+        print("Dropping received block...")
+
+
 class BlocksHandler:
 
     def on_post(self, req, resp):
-        t = req.stream.read().decode()
-        new_block_json = json.loads(t)
-        new_block = Block.load_from_json(new_block_json)
-        logging.info("Received new block")
-        if validate_block(new_block):
-            if writer_service.get_head_block_number() + 1 != new_block.block_number:
-                response = {'status': 'failure', 'message': 'Invalid block number.'}
-                response = json.dumps(response)
-                resp.body = response
-                logging.error("Expecting block number "+ str(writer_service.get_head_block_number() + 1) + " given " + str(new_block.block_number ))
-            else:
-                writer_service.write(new_block.block_hash, new_block)
+        data = json.loads(req.stream.read().decode())
 
-                response = {'status': 'success'}
-                response = json.dumps(response)
-                resp.body = response
-        else:
-            logging.error("Received block is invalid")
+        new_block_json = data['block']
+        new_block = Block.load_from_json(new_block_json)
+
+        sender = data['sender']
+
+        logging.info("Received new block")
+
+        validate_and_insert_block(new_block, sender)
+        response = {'status': 'success'}
+        response = json.dumps(response)
+        resp.body = response
 
 
 # Read the complete Blockchain, if it exists

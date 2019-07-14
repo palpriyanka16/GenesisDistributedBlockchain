@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import json
+import os
 import sys
 import subprocess
 from Models import Block, Transaction
@@ -33,7 +34,7 @@ class WriterService:
             with open("./BlockChain/head_block_hash") as f:
                 head_block_hash = f.read()
 
-            with open("./BlockChain/" + head_block_hash + ".json") as f:
+            with open(self.config['LOCAL_PATH'] + head_block_hash + ".json") as f:
                 block_json = json.loads(f.read())
                 self.head_block = Block.load_from_json(block_json)
 
@@ -99,3 +100,18 @@ class WriterService:
     def update_head_block_hash(self, block_hash):
         with open("./BlockChain/head_block_hash", "w") as f:
             f.write(block_hash)
+
+    def remove_existing_blockchain(self):
+        self.head_block = None
+        with open("./BlockChain/head_block_hash", "w") as f:
+            f.write("")
+
+        block_files = [f for f in os.listdir(self.config['LOCAL_PATH']) if f.endswith(".json")]
+        for f in block_files:
+            os.remove(os.path.join(self.config['LOCAL_PATH'], f))
+
+        # TODO: Add HDFS commands to delete the blockchain
+        try:
+            pass
+        except:
+            pass
