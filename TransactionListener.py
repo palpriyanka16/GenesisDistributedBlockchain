@@ -139,7 +139,6 @@ def validate_and_insert_block(block, sender):
 
         writer_service.remove_existing_blockchain()
         for block in new_blockchain:
-            print("block number : " + str(block.block_number))
             validate_and_insert_block(block, sender)
     else:
         print("Dropping received block...")

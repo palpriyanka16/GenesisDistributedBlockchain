@@ -110,6 +110,8 @@ class WriterService:
         for f in block_files:
             os.remove(os.path.join(self.config['LOCAL_PATH'], f))
 
+        transactions_pooling_service.clean_transactions_pool()
+
         # TODO: Add HDFS commands to delete the blockchain
         try:
             pass
