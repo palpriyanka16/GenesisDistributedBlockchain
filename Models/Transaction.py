@@ -28,10 +28,12 @@ class Transaction:
             for developmental purposes only.
             TODO: Enable this function before final submission.
         '''
-        return True
 
         # The 'sender' is the PEM format of the sender's RSA public key
-        pubkey = rsa.PublicKey.load_pkcs1(self.sender.encode())
+        sender_public_key = "-----BEGIN RSA PUBLIC KEY-----\n{}\n-----END RSA PUBLIC KEY-----\n".format(self.sender).encode()
+        # sender_public_key = self.sender.encode()
+        # print(sender_public_key)
+        pubkey = rsa.PublicKey.load_pkcs1(sender_public_key)
         data_hash = sha256(self.data.encode()).hexdigest().encode()
         signature = codecs.decode(self.signature.encode(), "hex") # hex to bytes conversion
 
