@@ -31,13 +31,31 @@ First, get this project cloned to your local system using the following command 
   ```bash
    pip3 install -r requirements.txt
   ```
+* Install hadoop 2.7 on a ubuntu system using the following guide 
+  [install-apache-hadoop-27-on-buntu-1604.html](https://ricma.co/install-apache-hadoop-27-on-buntu-1604.html)
+
+* Copy the contents of config.json.example into a new file named as config.json and fill in the parameters. Sample config file has been provided below.
+ Our application can be run in two modes:
+    - local - blockchain will be stored in local file system
+    - hadoop - blockchain will be stored in hdfs
+
+```json
+    {
+      "MODE": "hadoop",
+      "LOCAL_PATH": "./BlockChain/",
+      "HDFS_PATH": "/user/BlockChain/",
+      "HDFS_HOST": "localhost",
+      "HDFS_PORT": 9000
+    }
+```
+    
+
 
 * Run the backend services by running the following command on your terminal
 
   ```bash
      ./start.sh
   ```
-
 * Open index.html in your browser to make use of the web interface in order to avail the different features provided by the backend services.
 
 
@@ -134,6 +152,13 @@ First, get this project cloned to your local system using the following command 
         ]
       }
    ```
+## Services running on server
+
+* Mining Service - It accepts a list of n number of transactions where n is the maximum number of transactions per block and mines a block. After mining, the block is sent to the writing service.
+* Network Service - This serves for broadcasting a mined block from one namenode to other namenodes in the network.
+* Reader Service - This serves for retrieving a particular transaction or the entire blockchain from the distributed storage. 
+* Writer Service - This serves for writing a mined block onto the blockchain which can be stored on a distributed platform.
+* Transaction pooling Service - This serves for maintaining a pool of mined and unmined transactions.
 
 ## Built with
 
@@ -141,4 +166,4 @@ First, get this project cloned to your local system using the following command 
 * Html
 * Javascript
 * CSS
-
+* Apache Hadoop
