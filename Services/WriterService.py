@@ -26,7 +26,6 @@ class WriterService:
         with open('./config.json', 'r') as f:
             self.config = json.load(f)
 
-
         # The 'head_block_hash' file, if exists, stores the block hash of the head block.
         # Check to see if the file exists, and if so, read the corresponding 
         # block, and assign it to the head_block property

@@ -6,11 +6,9 @@ logging.basicConfig(level=logging.DEBUG)
 from Services.WriterService import WriterService
 
 
-
 class ReaderService:
     __instance = None
     writer_service = WriterService.get_instance()
-
 
     def __init__(self):
         if ReaderService.__instance is not None:
@@ -45,7 +43,7 @@ class ReaderService:
 
 
     def read_transaction(self, block_file_path, transaction_hash):
-        # might be replaced by a hdfs command to read file
+        
         mode = self.writer_service.config['MODE']
 
         if mode == "local":
@@ -53,7 +51,6 @@ class ReaderService:
         elif mode == "hadoop":
             data = self.read_from_hdfs(block_file_path)
        
-
         transaction = data['transactions'][transaction_hash]
         logging.info("Transaction read from the blockchain:")
         logging.info(transaction)

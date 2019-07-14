@@ -10,10 +10,6 @@ class Block:
         self.transactions = transactions
         self.block_hash = block_hash
 
-    # def add_transaction(self, transaction):
-    #     trans_id = transaction.get_id()
-    #     self.transactions[trans_id] = transaction
-
     def __str__(self):
         header = "Block Number: {}\nPrevious Block Hash: {}\n".format(self.block_number, self.prev_block_hash)
         transactions = '\n'.join([x for x in self.transactions])

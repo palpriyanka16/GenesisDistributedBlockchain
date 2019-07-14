@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG)
 class NetworkService:
     __instance = None
 
-    PEERS_ADDRESS = []     # list of "host:port"
+    PEERS_ADDRESS = []     # list of "host:port" e.g. "194.56.23.57:5000"
 
     def __init__(self):
         if NetworkService.__instance is not None:
@@ -32,8 +32,11 @@ class NetworkService:
             requests.post(url=url, json=block_dict)
 
     def broadcast_transaction(self, transaction):
+        '''
+            Function to send a new transaction to peers of the current node
+        '''
         transaction_dict = transaction.convert_to_dict()
         for i in self.PEERS_ADDRESS:
             url = "http://{}/transaction".format(i)
             logging.info("Sending transaction to " + url)
-            requests.post(url, data=transaction_dict) # TODO: Change from 'data' to 'json' parameter
+            requests.post(url, data=transaction_dict)
