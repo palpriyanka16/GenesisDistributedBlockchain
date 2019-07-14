@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import hashlib
 import json
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -40,7 +41,7 @@ def validate_transaction(transaction):
     if not transaction.verify():
         logging.error("Invalid transaction: {}".format(transaction.get_id()))
         return False
-    logging.info("Transaction validated successfully")
+    logging.info("Transaction validated successfully.\n")
     return True
 
 # function to verify and signatures and hashes for transactions and block data
@@ -51,9 +52,9 @@ def validate_block(block):
         transactions_list.append(transaction)
     block_data_without_nonce = Block.block_data_without_nonce(block.block_number, block.prev_block_hash, transactions_list)
     block_data = block_data_without_nonce + str(block.nonce)
-    block_data_hash = md5(block_data.encode()).hexdigest()
+    block_data_hash = hashlib.md5(block_data.encode()).hexdigest()
     
-    if not mining_service.__satisfies_difficulty(block_data_hash):
+    if not mining_service.satisfies_difficulty(block_data_hash):
         logging.error("Nonce of the block does not meet mining criteria")
         return False
 
@@ -61,7 +62,7 @@ def validate_block(block):
         if not transaction.verify():
             logging.error("Transaction with an invalid signature encountered")
             return False
-    logging.info("Block validated successfully")
+    logging.info("Block validated successfully.\n")
     return True
 
 
@@ -72,7 +73,6 @@ def mine_transactions():
         transactions_to_mine = unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
         mining_service.mine(transactions_to_mine)
         del unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
-        logging.info("Transaction has been mined")
 
 
 class TransactionsHandler:
@@ -96,8 +96,8 @@ class TransactionsHandler:
         if validate_transaction(t):
             # Add the transaction to the unmined transactions list
             transaction_pooling_service.unmined_transactions.append(t)
-            logging.info("Received Transaction has been added to unmined transactions")
-            network_service.broadcast_transaction(t)
+            logging.info("Received Transaction has been added to unmined transactions.\n")
+            # network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
 

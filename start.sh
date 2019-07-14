@@ -20,4 +20,4 @@ NUM_THREADS=3
 NUM_WORKERS=1
 
 gunicorn -w $NUM_WORKERS --threads $NUM_THREADS -b 0.0.0.0:$PORT TransactionListener:api \
-		 --reload --capture-output --reuse-port --timeout 90
+		 --capture-output --reuse-port --timeout 90

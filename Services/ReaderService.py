@@ -69,7 +69,7 @@ class ReaderService:
         return block
 
     def read_block_chain(self):
-        logging.info("Blockchain is being read")
+        logging.info("Blockchain is being read\n")
         head_block_hash = self.writer_service.get_head_block_hash()
         current_block_hash = head_block_hash
 
