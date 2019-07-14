@@ -31,7 +31,7 @@ class WriterService:
         # Check to see if the file exists, and if so, read the corresponding 
         # block, and assign it to the head_block property
         try:
-            with open("./BlockChain/head_block_hash") as f:
+            with open(self.config['LOCAL_PATH'] + "head_block_hash") as f:
                 head_block_hash = f.read()
 
             with open(self.config['LOCAL_PATH'] + head_block_hash + ".json") as f:
@@ -98,12 +98,12 @@ class WriterService:
         network_service.broadcast_block(block)
 
     def update_head_block_hash(self, block_hash):
-        with open("./BlockChain/head_block_hash", "w") as f:
+        with open(self.config['LOCAL_PATH'] + "head_block_hash", "w") as f:
             f.write(block_hash)
 
     def remove_existing_blockchain(self):
         self.head_block = None
-        with open("./BlockChain/head_block_hash", "w") as f:
+        with open(self.config['LOCAL_PATH'] + "head_block_hash", "w") as f:
             f.write("")
 
         block_files = [f for f in os.listdir(self.config['LOCAL_PATH']) if f.endswith(".json")]
