@@ -65,11 +65,10 @@ class ReaderService:
         elif mode == "hadoop":
             block = self.read_from_hdfs(block_hash)
 
-
         return block
 
     def read_block_chain(self):
-        logging.info("Blockchain is being read")
+        logging.info("Blockchain is being read\n")
         head_block_hash = self.writer_service.get_head_block_hash()
         current_block_hash = head_block_hash
 

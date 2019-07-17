@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import hashlib
 import json
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -40,7 +41,7 @@ def validate_transaction(transaction):
     if not transaction.verify():
         logging.error("Invalid transaction: {}".format(transaction.get_id()))
         return False
-    logging.info("Transaction validated successfully")
+    logging.info("Transaction validated successfully.\n")
     return True
 
 # function to verify and signatures and hashes for transactions and block data
@@ -51,9 +52,9 @@ def validate_block(block):
         transactions_list.append(transaction)
     block_data_without_nonce = Block.block_data_without_nonce(block.block_number, block.prev_block_hash, transactions_list)
     block_data = block_data_without_nonce + str(block.nonce)
-    block_data_hash = md5(block_data.encode()).hexdigest()
+    block_data_hash = hashlib.md5(block_data.encode()).hexdigest()
     
-    if not mining_service.__satisfies_difficulty(block_data_hash):
+    if not mining_service.satisfies_difficulty(block_data_hash):
         logging.error("Nonce of the block does not meet mining criteria")
         return False
 
@@ -61,7 +62,17 @@ def validate_block(block):
         if not transaction.verify():
             logging.error("Transaction with an invalid signature encountered")
             return False
-    logging.info("Block validated successfully")
+    logging.info("Block validated successfully.\n")
+    return True
+
+
+# function to validate only the new blocks to check if it can be appended to
+# the existing blockchain
+def validate_new_block_header(block):
+    if writer_service.get_head_block_number() + 1 != block.block_number:
+        return False
+    if writer_service.get_head_block_hash() != block.prev_block_hash:
+        return False
     return True
 
 
@@ -72,7 +83,6 @@ def mine_transactions():
         transactions_to_mine = unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
         mining_service.mine(transactions_to_mine)
         del unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
-        logging.info("Transaction has been mined")
 
 
 class TransactionsHandler:
@@ -96,8 +106,8 @@ class TransactionsHandler:
         if validate_transaction(t):
             # Add the transaction to the unmined transactions list
             transaction_pooling_service.unmined_transactions.append(t)
-            logging.info("Received Transaction has been added to unmined transactions")
-            network_service.broadcast_transaction(t)
+            logging.info("Received Transaction has been added to unmined transactions.\n")
+            # network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
 
@@ -106,6 +116,7 @@ class TransactionsHandler:
 
         response = json.dumps(response)
         resp.body = response
+
 
 class BlockChainHandler:
 
@@ -117,27 +128,38 @@ class BlockChainHandler:
         resp.body = response
 
 
+def validate_and_insert_block(block, sender):
+    if validate_new_block_header(block):
+        if validate_block(block):
+            writer_service.write(block.block_hash, block)
+        else:
+            logging.error("Received block is invalid")
+    elif block.block_number > writer_service.get_head_block_number():
+        new_blockchain = network_service.fetch_blockchain_from(sender)
+
+        writer_service.remove_existing_blockchain()
+        for block in new_blockchain:
+            validate_and_insert_block(block, sender)
+    else:
+        print("Dropping received block...")
+
+
 class BlocksHandler:
 
     def on_post(self, req, resp):
-        t = req.stream.read().decode()
-        new_block_json = json.loads(t)
-        new_block = Block.load_from_json(new_block_json)
-        logging.info("Received new block")
-        if validate_block(new_block):
-            if writer_service.get_head_block_number() + 1 != new_block.block_number:
-                response = {'status': 'failure', 'message': 'Invalid block number.'}
-                response = json.dumps(response)
-                resp.body = response
-                logging.error("Expecting block number "+ str(writer_service.get_head_block_number() + 1) + " given " + str(new_block.block_number ))
-            else:
-                writer_service.write(new_block.block_hash, new_block)
+        data = json.loads(req.stream.read().decode())
 
-                response = {'status': 'success'}
-                response = json.dumps(response)
-                resp.body = response
-        else:
-            logging.error("Received block is invalid")
+        new_block_json = data['block']
+        new_block = Block.load_from_json(new_block_json)
+
+        sender = data['sender']
+
+        logging.info("Received new block")
+
+        validate_and_insert_block(new_block, sender)
+        response = {'status': 'success'}
+        response = json.dumps(response)
+        resp.body = response
 
 
 # Read the complete Blockchain, if it exists

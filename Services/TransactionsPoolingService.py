@@ -86,3 +86,10 @@ class TransactionsPoolingService:
         if not self.is_mined_transaction(transaction) and not self.is_unmined_transaction(transaction):
             return True
         return False
+
+    # Function to clean up transactions pool when the blockchain is reset
+    def clean_transactions_pool(self):
+        self.mined_transactions.clear()
+        # No need to clear unmined transactions as the write method in writer service
+        # itself cleans unmined_transactions when inserting into the blockchain. So,
+        # only the transactions not added in the blockchain will be left in unmined_transactions.

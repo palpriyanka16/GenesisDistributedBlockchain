@@ -28,7 +28,7 @@ class MiningService:
         MiningService.__instance = self
 
     # function to check if the hash satisfies the difficulty condition in mining
-    def __satisfies_difficulty(self, hashed_value_in_hex):
+    def satisfies_difficulty(self, hashed_value_in_hex):
         # number of bits in the given hash
         total_number_of_bits = len(hashed_value_in_hex) * 4
 
@@ -55,7 +55,7 @@ class MiningService:
         while nonce < self.__max_nonce:
             block_data = block_data_without_nonce + str(nonce)
             block_data_hash = md5(block_data.encode()).hexdigest()
-            if self.__satisfies_difficulty(block_data_hash):
+            if self.satisfies_difficulty(block_data_hash):
                 logging.info("Block " + str(block_number) + " mined with nonce " + str(nonce) + " : ")
 
                 #print(bin(int(block_data_hash, 16))[2:].zfill(len(block_data_hash) * 4))
