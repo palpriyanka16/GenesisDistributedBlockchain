@@ -44,6 +44,7 @@ class DataNodeMiningService:
     def mine(self, block_data_without_nonce, nonce_start, nonce_end):
         logging.info("Mining block with nonce range " + str(nonce_start) + ", " + str(nonce_end))
         valid_nonce = -1
+        block_hash_without_nonce = md5(block_data_without_nonce.encode()).hexdigest()
 
         for nonce in range(nonce_start, nonce_end):
             block_data = block_data_without_nonce + str(nonce)
@@ -53,9 +54,11 @@ class DataNodeMiningService:
                 logging.info("Block mined with nonce " + str(nonce) + " : ")
                 valid_nonce = nonce
 
-                block_hash_without_nonce = md5(block_data_without_nonce.encode()).hexdigest()
-
-                self.network_service.send_valid_nonce_to_master(valid_nonce, block_hash_without_nonce)
+                self.network_service.send_valid_nonce_to_master(
+                    valid_nonce,
+                    block_hash_without_nonce,
+                    self.MASTER_ADDRESS
+                )
 
                 # print(bin(int(block_data_hash, 16))[2:].zfill(len(block_data_hash) * 4))
                 break
@@ -63,5 +66,5 @@ class DataNodeMiningService:
 
         # Ideally, we should shuffle the transactions and repeat the process till we get a valid nonce
         if valid_nonce == -1:
-            network_service.inform_master_nonce_not_in_range(self.MASTER_ADDRESS)
+            self.network_service.inform_master_nonce_not_in_range(block_hash_without_nonce, self.MASTER_ADDRESS)
             raise Exception("Couldn't find a valid nonce for the data.")

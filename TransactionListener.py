@@ -174,6 +174,17 @@ class BlockMiningHandler:
         data_node_mining_service.mine(block_data_without_nonce, data["nonce_start"], data["nonce_end"])
 
 
+class BlockNonceListener:
+
+    def on_post(self, req, resp):
+        data = json.loads(req.stream.read().decode())
+
+        if data["nonce_found"]:
+            pool_mining_service.validate_and_add_block(data["nonce"], data["block_hash"])
+        else:
+            pool_mining_service.send_next_nonce_range(data["sender"])
+
+
 # Read the complete Blockchain, if it exists
 block_chain = reader_service.read_block_chain()
 
@@ -194,6 +205,7 @@ api.add_route('/transaction', TransactionsHandler())
 api.add_route('/block/all', BlockChainHandler())
 api.add_route('/block', BlocksHandler())
 api.add_route('/block/mine', BlockMiningHandler())
+api.add_route('/block/nonce', BlockNonceListener())
 
 # httpd = simple_server.make_server('127.0.0.1', 8000, api)
 # print("Listening for newer transactions on http://localhost:8000/transaction")
