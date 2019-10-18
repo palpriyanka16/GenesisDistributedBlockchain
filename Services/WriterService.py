@@ -73,6 +73,17 @@ class WriterService:
         except:
             logging.error("Error occured in connecting to hadoop")
 
+    def remove_hdfs_blockchain(self):
+        try:
+            from hdfs3 import HDFileSystem
+            hdfs = HDFileSystem(host=self.config['HDFS_HOST'], port=self.config['HDFS_PORT'])
+            for file in hdfs.ls(self.config['HDFS_PATH']):
+                hdfs.rm(file)
+        except ImportError:
+            logging.error("hdfs3 module not found")
+        except:
+            logging.error("Error occured in connecting to hadoop")
+
     def write(self, block_hash, block):
         logging.info("Writing blocks into Blockchain")
         file_for_block = block_hash + '.json'
@@ -115,9 +126,6 @@ class WriterService:
             os.remove(os.path.join(self.config['LOCAL_PATH'], f))
 
         transactions_pooling_service.clean_transactions_pool()
-
-        # TODO: Add HDFS commands to delete the blockchain
-        try:
-            pass
-        except:
-            pass
+        mode = self.config['MODE']
+        if mode == 'hadoop':
+            self.remove_hdfs_blockchain()
