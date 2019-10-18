@@ -7,6 +7,7 @@ import subprocess
 from Models import Block, Transaction
 from Services.NetworkService import NetworkService
 from Services.TransactionsPoolingService import TransactionsPoolingService
+from TransactionListener import mine_transactions
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -72,7 +73,6 @@ class WriterService:
         except:
             logging.error("Error occured in connecting to hadoop")
 
-
     def write(self, block_hash, block):
         logging.info("Writing blocks into Blockchain")
         file_for_block = block_hash + '.json'
@@ -96,6 +96,10 @@ class WriterService:
         self.head_block = block
         self.update_head_block_hash(block_hash)
         network_service.broadcast_block(block)
+
+        # Call mine transactions function to start mining new set of unmined transaction
+        # if exists
+        mine_transactions()
 
     def update_head_block_hash(self, block_hash):
         with open(self.config['LOCAL_PATH'] + "head_block_hash", "w") as f:

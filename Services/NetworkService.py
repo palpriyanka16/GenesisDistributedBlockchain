@@ -68,8 +68,21 @@ class NetworkService:
 
         requests.post(url=url, json=data)
 
-    def send_valid_nonce_to_master(self, nonce, block_hash):
-        logging.info("Nonce with " + str(nonce) + "and block_hash " + block_hash + " will be sent to master.")
+    def send_nonce_details_to_master(self, block_hash, nonce_found, nonce, master_address):
+        url = "http://{}/block/nonce".format(master_address)
+        data = {
+            "sender": self.MY_ADDRESS,
+            "block_hash": block_hash,
+            "nonce_found": nonce_found,
+            "nonce": nonce
+        }
 
-    def inform_master_nonce_not_in_range(self, master_address):
+        requests.post(url=url, json=data)
+
+    def send_valid_nonce_to_master(self, nonce, block_hash, master_address):
+        logging.info("Nonce with " + str(nonce) + "and block_hash " + block_hash + " will be sent to master.")
+        self.send_nonce_details_to_master(block_hash, True, nonce, master_address)
+
+    def inform_master_nonce_not_in_range(self, block_hash, master_address):
         logging.info("Nonce not in range will be informed to master.")
+        self.send_nonce_details_to_master(block_hash, False, -1, master_address)
