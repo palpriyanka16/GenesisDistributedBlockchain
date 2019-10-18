@@ -179,10 +179,11 @@ class BlockNonceListener:
     def on_post(self, req, resp):
         data = json.loads(req.stream.read().decode())
 
+        print(type(data["nonce_found"]))
         if data["nonce_found"]:
             pool_mining_service.validate_and_add_block(data["nonce"], data["block_hash"])
         else:
-            pool_mining_service.send_next_nonce_range(data["sender"])
+            pool_mining_service.send_next_nonce_range(data["sender"], data["block_hash"])
 
 
 # Read the complete Blockchain, if it exists

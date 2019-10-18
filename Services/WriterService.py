@@ -2,12 +2,10 @@
 
 import json
 import os
-import sys
-import subprocess
-from Models import Block, Transaction
+from Models import Block
 from Services.NetworkService import NetworkService
 from Services.TransactionsPoolingService import TransactionsPoolingService
-from TransactionListener import mine_transactions
+# from ..TransactionListener import mine_transactions
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -110,7 +108,7 @@ class WriterService:
 
         # Call mine transactions function to start mining new set of unmined transaction
         # if exists
-        mine_transactions()
+        # mine_transactions()
 
     def update_head_block_hash(self, block_hash):
         with open(self.config['LOCAL_PATH'] + "head_block_hash", "w") as f:

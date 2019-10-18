@@ -3,6 +3,7 @@
 	"LOCAL_PATH": "./BlockChain/",
 	"HDFS_PATH": "",
 	"HDFS_HOST": "localhost",
-	"HDFS_PORT": 8020
+	"HDFS_PORT": 8020,
+	"MY_ADDRESS": "localhost:8001",
+	"MASTER_ADDRESS": "localhost:8000"
 }
-

@@ -10,7 +10,7 @@ from Services.WriterService import WriterService
 class PoolMiningService:
     TRANSACTIONS_PER_BLOCK = 2
     NONCE_RANGE_PER_NODE = 200000
-    DATA_NODES_ADDRESS = ["localhost:8000"]
+    DATA_NODES_ADDRESS = ["localhost:8000", "localhost:8001"]
 
     __instance = None
     __mining_difficulty = 20     # num of initial bits to be zero in the block hash
@@ -90,7 +90,14 @@ class PoolMiningService:
             "transactions": {}
         }
 
-    def send_next_nonce_range(self, to):
+    def send_next_nonce_range(self, to, block_hash):
+        logging.info("\n\n\n")
+        if block_hash != self.cur_block_in_buffer["block_hash"]:
+            logging.info(block_hash)
+            logging.info(self.cur_block_in_buffer["block_hash"])
+            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
+            return
+
         block_with_nonce_range = {
             "block": self.cur_block_in_buffer["block_data_without_nonce"],
             "nonce_start": self.cur_nonce_start_value,
@@ -101,7 +108,11 @@ class PoolMiningService:
         self.cur_nonce_start_value += self.NONCE_RANGE_PER_NODE
 
     def validate_and_add_block(self, nonce, block_hash):
+        logging.info("\n\n\n")
         if block_hash != self.cur_block_in_buffer["block_hash"]:
+            logging.info(block_hash)
+            logging.info(self.cur_block_in_buffer["block_hash"])
+            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
             return
 
         block_data = self.cur_block_in_buffer["block_data_without_nonce"] + str(nonce)
