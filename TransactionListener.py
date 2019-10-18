@@ -10,14 +10,16 @@ from wsgiref import simple_server
 from falcon_cors import CORS
 
 from Models import Block, Transaction
+from Services.DataNodeMiningService import DataNodeMiningService
 from Services.NetworkService import NetworkService
-from Services.MiningService import MiningService
+from Services.PoolMiningService import PoolMiningService
 from Services.ReaderService import ReaderService
 from Services.WriterService import WriterService
 from Services.TransactionsPoolingService import TransactionsPoolingService
 
+data_node_mining_service = DataNodeMiningService.get_instance()
 network_service = NetworkService.get_instance()
-mining_service = MiningService.get_instance()
+pool_mining_service = PoolMiningService.get_instance()
 reader_service = ReaderService.get_instance()
 writer_service = WriterService.get_instance()
 transaction_pooling_service = TransactionsPoolingService.get_instance()
@@ -54,7 +56,7 @@ def validate_block(block):
     block_data = block_data_without_nonce + str(block.nonce)
     block_data_hash = hashlib.md5(block_data.encode()).hexdigest()
     
-    if not mining_service.satisfies_difficulty(block_data_hash):
+    if not pool_mining_service.satisfies_difficulty(block_data_hash):
         logging.error("Nonce of the block does not meet mining criteria")
         return False
 
@@ -79,10 +81,10 @@ def validate_new_block_header(block):
 def mine_transactions():
     unmined_transactions = transaction_pooling_service.unmined_transactions
 
-    if len(unmined_transactions) >= MiningService.TRANSACTIONS_PER_BLOCK:
-        transactions_to_mine = unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
-        mining_service.mine(transactions_to_mine)
-        del unmined_transactions[:MiningService.TRANSACTIONS_PER_BLOCK]
+    if len(unmined_transactions) >= PoolMiningService.TRANSACTIONS_PER_BLOCK:
+        transactions_to_mine = unmined_transactions[:PoolMiningService.TRANSACTIONS_PER_BLOCK]
+        # mining_service.mine(transactions_to_mine)
+        pool_mining_service.mine_new_transaction_set(transactions_to_mine)
 
 
 class TransactionsHandler:
@@ -107,6 +109,7 @@ class TransactionsHandler:
             # Add the transaction to the unmined transactions list
             transaction_pooling_service.unmined_transactions.append(t)
             logging.info("Received Transaction has been added to unmined transactions.\n")
+            logging.info(len(transaction_pooling_service.unmined_transactions))
             # network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
@@ -162,6 +165,15 @@ class BlocksHandler:
         resp.body = response
 
 
+class BlockMiningHandler:
+
+    def on_post(self, req, resp):
+        data = json.loads(req.stream.read().decode())
+
+        block_data_without_nonce = data['block']
+        data_node_mining_service.mine(block_data_without_nonce, data["nonce_start"], data["nonce_end"])
+
+
 # Read the complete Blockchain, if it exists
 block_chain = reader_service.read_block_chain()
 
@@ -181,6 +193,7 @@ api.req_options.auto_parse_form_urlencoded = True
 api.add_route('/transaction', TransactionsHandler())
 api.add_route('/block/all', BlockChainHandler())
 api.add_route('/block', BlocksHandler())
+api.add_route('/block/mine', BlockMiningHandler())
 
 # httpd = simple_server.make_server('127.0.0.1', 8000, api)
 # print("Listening for newer transactions on http://localhost:8000/transaction")

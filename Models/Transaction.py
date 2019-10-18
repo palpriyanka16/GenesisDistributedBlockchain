@@ -23,6 +23,8 @@ class Transaction:
         return transaction_hash
 
     def verify(self):
+        # TODO: lol
+        return True
         '''
             WARNING: Disabling the cryptographic verification of a transaction
             for developmental purposes only.

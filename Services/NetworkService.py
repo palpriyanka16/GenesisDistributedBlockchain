@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 from Models import Block
 
+
 class NetworkService:
     __instance = None
 
@@ -23,7 +24,7 @@ class NetworkService:
         if NetworkService.__instance is None:
             return NetworkService()
         return NetworkService.__instance
-    
+
     def broadcast_block(self, block):
         '''
             Function to send a mined block to peers of the current node
@@ -60,3 +61,15 @@ class NetworkService:
             blockchain.append(block)
 
         return blockchain
+
+    def send_block_for_mining(self, target_node, data):
+        url = "http://{}/block/mine".format(target_node)
+        logging.info("Sending block for mining to " + url)
+
+        requests.post(url=url, json=data)
+
+    def send_valid_nonce_to_master(self, nonce, block_hash):
+        logging.info("Nonce with " + str(nonce) + "and block_hash " + block_hash + " will be sent to master.")
+
+    def inform_master_nonce_not_in_range(self, master_address):
+        logging.info("Nonce not in range will be informed to master.")
