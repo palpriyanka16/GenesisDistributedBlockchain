@@ -2,15 +2,17 @@
 
 import requests
 import json
+
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(format='[ %(asctime)s ] %(levelname)s: <%(name)s>: %(message)s')
+
 
 from Models import Block
 
 
 class NetworkService:
     __instance = None
-
+    logger = logging.getLoger('NetworkService');
     PEERS_ADDRESS = []     # list of "host:port" e.g. "194.56.23.57:5000"
     my_address = "localhost:8000"       # TODO: Fetch this address from config file
     config = None
@@ -41,7 +43,8 @@ class NetworkService:
         }
         for i in self.PEERS_ADDRESS:
             url = "http://{}/block".format(i)
-            logging.info("Sending block to " + url)
+            self.logger.info("Sending mined block to {}".format(url));
+            self.logger.debug(data)
             requests.post(url=url, json=data)
 
     def broadcast_transaction(self, transaction):
@@ -51,12 +54,13 @@ class NetworkService:
         transaction_dict = transaction.convert_to_dict()
         for i in self.PEERS_ADDRESS:
             url = "http://{}/transaction".format(i)
-            logging.info("Sending transaction to " + url)
+            self.logger.info("Sending transaction to: {}".format(url))
+            self.loggerdebug(transaction_dict)
             requests.post(url, data=transaction_dict)
 
     def fetch_blockchain_from(self, target_peer):
         url = "http://{}/block/all".format(target_peer)
-        logging.info("Fetching blockchain from " + url)
+        self.logger.info("Fetching Blockchain from {}".format(url))
         response = requests.get(url=url)
         blockchain_json = response.json()['data']
 
