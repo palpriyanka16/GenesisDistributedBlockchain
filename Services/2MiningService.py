@@ -11,7 +11,7 @@ class MiningService:
 
     logger = logging.getLogger(name="MiningService")
     __instance = None
-    __mining_difficulty = 5     # num of initial bits to be zero in the block hash
+    __mining_difficulty = 20     # num of initial bits to be zero in the block hash
     __max_nonce = 2**32         # nonce is usually a 32 bit integer
     writer_service = WriterService.get_instance()
 

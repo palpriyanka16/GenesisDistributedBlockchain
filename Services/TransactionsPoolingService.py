@@ -1,7 +1,9 @@
 import json
 import logging
-logging.basicConfig(level=logging.DEBUG)
+
 from Models import Block, Transaction
+
+logger = logging.getLogger('TransactionPoolingService')
 
 
 class TransactionsPoolingService:
