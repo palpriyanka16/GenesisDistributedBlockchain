@@ -104,12 +104,9 @@ class TransactionsHandler:
 
     def on_post(self, req, resp):
         # TODO: Change the input data format to be 'json', see BlocksHandler
-        # logger.info(req.__dict__)
+        logger.info(req.__dict__)
         sender = req.params['sender']
         transaction_data = req.params['data']
-        # logger.info('potato')
-        # transaction_data = req.get_param('data')
-        # encoded_data = base64.b64encode(transaction_data.file.read()).decode()
         signature = req.params['signature']
         t = Transaction(sender, transaction_data, signature)
         if validate_transaction(t):
