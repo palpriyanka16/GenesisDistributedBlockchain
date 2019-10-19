@@ -90,7 +90,14 @@ class PoolMiningService:
             "transactions": {}
         }
 
-    def send_next_nonce_range(self, to):
+    def send_next_nonce_range(self, to, block_hash):
+        logging.info("\n\n\n")
+        if block_hash != self.cur_block_in_buffer["block_hash"]:
+            logging.info(block_hash)
+            logging.info(self.cur_block_in_buffer["block_hash"])
+            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
+            return
+
         block_with_nonce_range = {
             "block": self.cur_block_in_buffer["block_data_without_nonce"],
             "nonce_start": self.cur_nonce_start_value,
@@ -101,7 +108,11 @@ class PoolMiningService:
         self.cur_nonce_start_value += self.NONCE_RANGE_PER_NODE
 
     def validate_and_add_block(self, nonce, block_hash):
+        logging.info("\n\n\n")
         if block_hash != self.cur_block_in_buffer["block_hash"]:
+            logging.info(block_hash)
+            logging.info(self.cur_block_in_buffer["block_hash"])
+            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
             return
 
         block_data = self.cur_block_in_buffer["block_data_without_nonce"] + str(nonce)
@@ -110,7 +121,7 @@ class PoolMiningService:
             logging.error("Nonce of the block does not meet mining criteria")
             return
 
-        self.reset_pool()
+
         block = Block(
             self.cur_block_in_buffer["block_number"],
             self.cur_block_in_buffer["prev_block_hash"],
@@ -118,5 +129,6 @@ class PoolMiningService:
             nonce,
             block_data_hash
         )
+        self.reset_pool()
         logging.info(block.convert_to_dict())
         self.writer_service.write(block_data_hash, block)

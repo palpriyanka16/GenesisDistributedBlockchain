@@ -2,12 +2,10 @@
 
 import json
 import os
-import sys
-import subprocess
-from Models import Block, Transaction
+from Models import Block
 from Services.NetworkService import NetworkService
 from Services.TransactionsPoolingService import TransactionsPoolingService
-from TransactionListener import mine_transactions
+# from ..TransactionListener import mine_transactions
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -29,7 +27,7 @@ class WriterService:
             self.config = json.load(f)
 
         # The 'head_block_hash' file, if exists, stores the block hash of the head block.
-        # Check to see if the file exists, and if so, read the corresponding 
+        # Check to see if the file exists, and if so, read the corresponding
         # block, and assign it to the head_block property
         try:
             with open(self.config['LOCAL_PATH'] + "head_block_hash") as f:
@@ -64,10 +62,22 @@ class WriterService:
 
     def write_to_hdfs(self, file_for_block):
         try:
-            from hdfs3 import HDFileSystem    
+            from hdfs3 import HDFileSystem
             hdfs = HDFileSystem(host = self.config['HDFS_HOST'], port = self.config['HDFS_PORT'])
             hdfs.touch(self.config['HDFS_PATH'] + file_for_block)
-            hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block)
+            hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block,
+                     block_size=512)
+        except ImportError:
+            logging.error("hdfs3 module not found")
+        except:
+            logging.error("Error occured in connecting to hadoop")
+
+    def remove_hdfs_blockchain(self):
+        try:
+            from hdfs3 import HDFileSystem
+            hdfs = HDFileSystem(host=self.config['HDFS_HOST'], port=self.config['HDFS_PORT'])
+            for file in hdfs.ls(self.config['HDFS_PATH']):
+                hdfs.rm(file)
         except ImportError:
             logging.error("hdfs3 module not found")
         except:
@@ -99,7 +109,7 @@ class WriterService:
 
         # Call mine transactions function to start mining new set of unmined transaction
         # if exists
-        mine_transactions()
+        # mine_transactions()
 
     def update_head_block_hash(self, block_hash):
         with open(self.config['LOCAL_PATH'] + "head_block_hash", "w") as f:
@@ -115,9 +125,6 @@ class WriterService:
             os.remove(os.path.join(self.config['LOCAL_PATH'], f))
 
         transactions_pooling_service.clean_transactions_pool()
-
-        # TODO: Add HDFS commands to delete the blockchain
-        try:
-            pass
-        except:
-            pass
+        mode = self.config['MODE']
+        if mode == 'hadoop':
+            self.remove_hdfs_blockchain()
