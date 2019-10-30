@@ -1,16 +1,16 @@
 from hashlib import md5
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 from Models import Block
 from Services.NetworkService import NetworkService
 from Services.WriterService import WriterService
 
+logger = logging.getLogger('PoolMiningService')
 
 class PoolMiningService:
     TRANSACTIONS_PER_BLOCK = 2
     NONCE_RANGE_PER_NODE = 200000
-    DATA_NODES_ADDRESS = ["localhost:8000", "localhost:8001"]
+    DATA_NODES_ADDRESS = ["localhost:8000"]
 
     __instance = None
     __mining_difficulty = 20     # num of initial bits to be zero in the block hash
@@ -91,11 +91,10 @@ class PoolMiningService:
         }
 
     def send_next_nonce_range(self, to, block_hash):
-        logging.info("\n\n\n")
         if block_hash != self.cur_block_in_buffer["block_hash"]:
-            logging.info(block_hash)
-            logging.info(self.cur_block_in_buffer["block_hash"])
-            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
+            logger.info(block_hash)
+            logger.info(self.cur_block_in_buffer["block_hash"])
+            logger.error("block_hash not equal to hash in buffer...\n\n\n\n")
             return
 
         block_with_nonce_range = {
@@ -108,20 +107,19 @@ class PoolMiningService:
         self.cur_nonce_start_value += self.NONCE_RANGE_PER_NODE
 
     def validate_and_add_block(self, nonce, block_hash):
-        logging.info("\n\n\n")
         if block_hash != self.cur_block_in_buffer["block_hash"]:
-            logging.info(block_hash)
-            logging.info(self.cur_block_in_buffer["block_hash"])
-            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
+            logger.info(block_hash)
+            logger.info(self.cur_block_in_buffer["block_hash"])
+            logger.error("block_hash not equal to hash in buffer...\n\n\n\n")
             return
 
         block_data = self.cur_block_in_buffer["block_data_without_nonce"] + str(nonce)
         block_data_hash = md5(block_data.encode()).hexdigest()
         if not self.satisfies_difficulty(block_data_hash):
-            logging.error("Nonce of the block does not meet mining criteria")
+            logger.error("Nonce of the block does not meet mining criteria")
             return
 
-        self.reset_pool()
+
         block = Block(
             self.cur_block_in_buffer["block_number"],
             self.cur_block_in_buffer["prev_block_hash"],
@@ -129,5 +127,6 @@ class PoolMiningService:
             nonce,
             block_data_hash
         )
-        logging.info(block.convert_to_dict())
+        self.reset_pool()
+        logger.info(block.convert_to_dict())
         self.writer_service.write(block_data_hash, block)

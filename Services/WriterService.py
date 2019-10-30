@@ -5,10 +5,10 @@ import os
 from Models import Block
 from Services.NetworkService import NetworkService
 from Services.TransactionsPoolingService import TransactionsPoolingService
+import logging
 # from ..TransactionListener import mine_transactions
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('WriterService')
 
 network_service = NetworkService.get_instance()
 transactions_pooling_service = TransactionsPoolingService.get_instance()
@@ -27,7 +27,7 @@ class WriterService:
             self.config = json.load(f)
 
         # The 'head_block_hash' file, if exists, stores the block hash of the head block.
-        # Check to see if the file exists, and if so, read the corresponding 
+        # Check to see if the file exists, and if so, read the corresponding
         # block, and assign it to the head_block property
         try:
             with open(self.config['LOCAL_PATH'] + "head_block_hash") as f:
@@ -62,14 +62,15 @@ class WriterService:
 
     def write_to_hdfs(self, file_for_block):
         try:
-            from hdfs3 import HDFileSystem    
+            from hdfs3 import HDFileSystem
             hdfs = HDFileSystem(host = self.config['HDFS_HOST'], port = self.config['HDFS_PORT'])
             hdfs.touch(self.config['HDFS_PATH'] + file_for_block)
-            hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block)
+            hdfs.put(self.config['LOCAL_PATH'] + file_for_block, self.config['HDFS_PATH'] + file_for_block,
+                     block_size=512)
         except ImportError:
-            logging.error("hdfs3 module not found")
+            logger.error("hdfs3 module not found")
         except:
-            logging.error("Error occured in connecting to hadoop")
+            logger.error("Error occured in connecting to hadoop")
 
     def remove_hdfs_blockchain(self):
         try:
@@ -78,12 +79,12 @@ class WriterService:
             for file in hdfs.ls(self.config['HDFS_PATH']):
                 hdfs.rm(file)
         except ImportError:
-            logging.error("hdfs3 module not found")
+            logger.error("hdfs3 module not found")
         except:
-            logging.error("Error occured in connecting to hadoop")
+            logger.error("Error occured in connecting to hadoop")
 
     def write(self, block_hash, block):
-        logging.info("Writing blocks into Blockchain")
+        logger.info("Writing blocks into Blockchain")
         file_for_block = block_hash + '.json'
 
         # Add/delete transactions from the Transaction Pool appropriately
@@ -97,7 +98,7 @@ class WriterService:
         self.write_to_local(block_json, file_for_block)
 
         mode = self.config['MODE']
-        logging.info("Mode: " + mode)
+        logger.info("Mode: " + mode)
 
         if mode == "hadoop":
             self.write_to_hdfs(file_for_block)

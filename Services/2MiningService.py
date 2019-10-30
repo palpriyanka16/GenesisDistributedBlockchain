@@ -1,6 +1,6 @@
 from hashlib import md5
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(format='[ %(asctime)s ] %(levelname)s: <%(name)s>: %(message)s')
 
 from Models import Block
 from Services.WriterService import WriterService
@@ -9,8 +9,9 @@ from Services.WriterService import WriterService
 class MiningService:
     TRANSACTIONS_PER_BLOCK = 2
 
+    logger = logging.getLogger(name="MiningService")
     __instance = None
-    __mining_difficulty = 5     # num of initial bits to be zero in the block hash
+    __mining_difficulty = 20     # num of initial bits to be zero in the block hash
     __max_nonce = 2**32         # nonce is usually a 32 bit integer
     writer_service = WriterService.get_instance()
 
@@ -43,12 +44,14 @@ class MiningService:
             raise Exception("Transactions count should be less than " + str(MiningService.TRANSACTIONS_PER_BLOCK) + 1)
 
         block_number = self.writer_service.get_head_block_number() + 1
+        self.logger.info("Starting to mine Block {} ...".format(block_number))
         prev_block_hash = self.writer_service.get_head_block_hash()
         block_data_without_nonce = Block.block_data_without_nonce(block_number, prev_block_hash, transaction_list)
 
         transactions = {}
         for t in transaction_list:
             transactions[t.get_id()] = t
+            self.logger.info("Adding transaction {} to block".format(t.get_id()))
 
         nonce = 0
         logging.info("Mining block : " + str(block_number))
@@ -57,10 +60,10 @@ class MiningService:
             block_data_hash = md5(block_data.encode()).hexdigest()
             if self.satisfies_difficulty(block_data_hash):
                 logging.info("Block " + str(block_number) + " mined with nonce " + str(nonce) + " : ")
-
+                self.logger.info("Block {} mined with nonce {}".format(block_number, nonce))
                 #print(bin(int(block_data_hash, 16))[2:].zfill(len(block_data_hash) * 4))
                 block = Block(block_number, prev_block_hash, transactions, nonce, block_data_hash)
-                logging.info(block.convert_to_dict())
+                self.logger.debug(block.convert_to_dict())
                 self.writer_service.write(block_data_hash, block)
                 break
             nonce += 1

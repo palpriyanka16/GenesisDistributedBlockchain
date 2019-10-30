@@ -1,11 +1,11 @@
 import json
 from hashlib import md5
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 from Services.WriterService import WriterService
 from Services.NetworkService import NetworkService
 
+logger = logging.getLogger('DataNodeMiningService')
 
 class DataNodeMiningService:
 
@@ -44,7 +44,7 @@ class DataNodeMiningService:
         return hashed_value_in_int < 2**(total_number_of_bits - self.__mining_difficulty)
 
     def mine(self, block_data_without_nonce, nonce_start, nonce_end):
-        logging.info(self.config['MY_ADDRESS'] + ": Mining block with nonce range " + str(nonce_start) + ", " + str(nonce_end))
+        logger.info(self.config['MY_ADDRESS'] + ": Mining block with nonce range " + str(nonce_start) + ", " + str(nonce_end))
         valid_nonce = -1
         block_hash_without_nonce = md5(block_data_without_nonce.encode()).hexdigest()
 
@@ -53,7 +53,7 @@ class DataNodeMiningService:
             block_data_hash = md5(block_data.encode()).hexdigest()
 
             if self.satisfies_difficulty(block_data_hash):
-                logging.info("Block mined with nonce " + str(nonce) + " : ")
+                logger.info("Block mined with nonce " + str(nonce) + " : ")
                 valid_nonce = nonce
 
                 self.network_service.send_valid_nonce_to_master(

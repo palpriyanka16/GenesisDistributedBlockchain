@@ -1,13 +1,14 @@
 import json
 import sys
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 from Services.WriterService import WriterService
 
+logger = logging.getLogger('ReaderServer')
 
 class ReaderService:
     __instance = None
+
     writer_service = WriterService.get_instance()
 
     def __init__(self):
@@ -37,9 +38,9 @@ class ReaderService:
                 data = json.load(read_file)
             return data
         except ImportError:
-            logging.error("hdfs3 module not found")
+            logger.error("hdfs3 module not found")
         except:
-            logging.error("Error in connecting to hadoop")
+            logger.error("Error in connecting to hadoop")
 
 
     def read_transaction(self, block_file_path, transaction_hash):
@@ -52,8 +53,8 @@ class ReaderService:
             data = self.read_from_hdfs(block_file_path)
        
         transaction = data['transactions'][transaction_hash]
-        logging.info("Transaction read from the blockchain:")
-        logging.info(transaction)
+        logger.info("Transaction read from the blockchain:")
+        logger.info(transaction)
 
         return transaction
 
@@ -68,7 +69,8 @@ class ReaderService:
         return block
 
     def read_block_chain(self):
-        logging.info("Blockchain is being read\n")
+        logger.info("Blockchain is being read")
+
         head_block_hash = self.writer_service.get_head_block_hash()
         current_block_hash = head_block_hash
 

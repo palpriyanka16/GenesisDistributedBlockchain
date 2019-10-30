@@ -2,15 +2,15 @@
 
 import requests
 import json
+
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('NetworkService')
 
 from Models import Block
 
 
 class NetworkService:
     __instance = None
-
     PEERS_ADDRESS = []     # list of "host:port" e.g. "194.56.23.57:5000"
     my_address = "localhost:8000"       # TODO: Fetch this address from config file
     config = None
@@ -41,7 +41,8 @@ class NetworkService:
         }
         for i in self.PEERS_ADDRESS:
             url = "http://{}/block".format(i)
-            logging.info("Sending block to " + url)
+            logger.info("Sending mined block to {}".format(url));
+            logger.debug(data)
             requests.post(url=url, json=data)
 
     def broadcast_transaction(self, transaction):
@@ -51,12 +52,13 @@ class NetworkService:
         transaction_dict = transaction.convert_to_dict()
         for i in self.PEERS_ADDRESS:
             url = "http://{}/transaction".format(i)
-            logging.info("Sending transaction to " + url)
+            logger.info("Sending transaction to: {}".format(url))
+            logger.debug(transaction_dict)
             requests.post(url, data=transaction_dict)
 
     def fetch_blockchain_from(self, target_peer):
         url = "http://{}/block/all".format(target_peer)
-        logging.info("Fetching blockchain from " + url)
+        logger.info("Fetching Blockchain from {}".format(url))
         response = requests.get(url=url)
         blockchain_json = response.json()['data']
 
@@ -69,10 +71,10 @@ class NetworkService:
 
     def send_block_for_mining(self, target_node, data):
         url = "http://{}/block/mine".format(target_node)
-        logging.info("Sending block for mining to " + url)
+        logger.info("Sending block for mining to " + url)
 
         try:
-            requests.post(url=url, json=data, timeout=0.0000000001)
+            requests.post(url=url, json=data, timeout=1)
         except requests.exceptions.ReadTimeout:
             pass
 
@@ -86,14 +88,14 @@ class NetworkService:
         }
 
         try:
-            requests.post(url=url, json=data, timeout=0.0000000001)
+            requests.post(url=url, json=data, timeout=1)
         except requests.exceptions.ReadTimeout:
             pass
 
     def send_valid_nonce_to_master(self, nonce, block_hash, master_address):
-        logging.info(self.my_address + ": Nonce with " + str(nonce) + "and block_hash " + block_hash + " will be sent to master.")
+        logger.info(self.my_address + ": Nonce with " + str(nonce) + "and block_hash " + block_hash + " will be sent to master.")
         self.send_nonce_details_to_master(block_hash, True, nonce, master_address)
 
     def inform_master_nonce_not_in_range(self, block_hash, master_address):
-        logging.info(self.my_address + ": Nonce not in range will be informed to master.")
+        logger.info(self.my_address + ": Nonce not in range. Informing to master.")
         self.send_nonce_details_to_master(block_hash, False, -1, master_address)

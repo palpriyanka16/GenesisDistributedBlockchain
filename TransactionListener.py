@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 import hashlib
 import json
+import base64
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(format='[%(asctime)s] %(levelname)s: <%(name)s>: %(message)s', level=logging.INFO)
 
 import falcon
+from falcon_multipart.middleware import MultipartMiddleware  
 from wsgiref import simple_server
 
 from falcon_cors import CORS
@@ -24,6 +26,7 @@ reader_service = ReaderService.get_instance()
 writer_service = WriterService.get_instance()
 transaction_pooling_service = TransactionsPoolingService.get_instance()
 
+logger = logging.getLogger('TransactionListener')
 
 def validate_transaction(transaction):
     '''
@@ -33,22 +36,22 @@ def validate_transaction(transaction):
         Returns true or false accordingly.
     '''
 
-    logging.info("Transaction is being validated")
+    logger.info("Transaction is being validated")
     # Check if it is a new transaction
     if not transaction_pooling_service.is_new_transaction(transaction):
-        logging.error("Duplicate transaction: {}".format(transaction.get_id()))
+        logger.error("Duplicate transaction: {}".format(transaction.get_id()))
         return False
 
     # Check if the signature is valid
     if not transaction.verify():
-        logging.error("Invalid transaction: {}".format(transaction.get_id()))
+        logger.error("Invalid transaction: {}".format(transaction.get_id()))
         return False
-    logging.info("Transaction validated successfully.\n")
+    logger.info("Transaction validated successfully.\n")
     return True
 
 # function to verify and signatures and hashes for transactions and block data
 def validate_block(block):
-    logging.info("Validating block...")
+    logger.info("Validating block...")
     transactions_list = []
     for transaction in block.transactions.values():
         transactions_list.append(transaction)
@@ -57,14 +60,14 @@ def validate_block(block):
     block_data_hash = hashlib.md5(block_data.encode()).hexdigest()
     
     if not pool_mining_service.satisfies_difficulty(block_data_hash):
-        logging.error("Nonce of the block does not meet mining criteria")
+        logger.error("Nonce of the block does not meet mining criteria")
         return False
 
     for transaction in block.transactions.values():
         if not transaction.verify():
-            logging.error("Transaction with an invalid signature encountered")
+            logger.error("Transaction with an invalid signature encountered")
             return False
-    logging.info("Block validated successfully.\n")
+    logger.info("Block validated successfully.\n")
     return True
 
 
@@ -92,7 +95,7 @@ class TransactionsHandler:
     def on_get(self, req, resp):
         blockHash = req.get_param("blockHash")
         txHash = req.get_param("txHash")
-        logging.info("Searching for transaction "+ txHash + " in  block " + blockHash)
+        logger.info("Searching for transaction "+ txHash + " in  block " + blockHash)
         transaction = reader_service.read_transaction(blockHash, txHash)
 
         response = {'status': 'success', 'data': transaction} ## response will contain the transaction json also
@@ -101,6 +104,7 @@ class TransactionsHandler:
 
     def on_post(self, req, resp):
         # TODO: Change the input data format to be 'json', see BlocksHandler
+        logger.info(req.__dict__)
         sender = req.params['sender']
         transaction_data = req.params['data']
         signature = req.params['signature']
@@ -108,12 +112,11 @@ class TransactionsHandler:
         if validate_transaction(t):
             # Add the transaction to the unmined transactions list
             transaction_pooling_service.unmined_transactions.append(t)
-            logging.info("Received Transaction has been added to unmined transactions.\n")
-            logging.info(len(transaction_pooling_service.unmined_transactions))
+            logger.info("Received Transaction has been added to unmined transactions.\n")
+            logger.info(len(transaction_pooling_service.unmined_transactions))
             # network_service.broadcast_transaction(t)
             mine_transactions()
             response = {'status': 'Success'}
-
         else:
             response = {'status': 'Failed'}
 
@@ -136,7 +139,7 @@ def validate_and_insert_block(block, sender):
         if validate_block(block):
             writer_service.write(block.block_hash, block)
         else:
-            logging.error("Received block is invalid")
+            logger.error("Received block is invalid")
     elif block.block_number > writer_service.get_head_block_number():
         new_blockchain = network_service.fetch_blockchain_from(sender)
 
@@ -157,7 +160,7 @@ class BlocksHandler:
 
         sender = data['sender']
 
-        logging.info("Received new block")
+        logger.info("Received new block")
 
         validate_and_insert_block(new_block, sender)
         response = {'status': 'success'}
@@ -200,7 +203,7 @@ cors_allow_all = CORS(allow_all_origins=True,
                       allow_all_headers=True,
                       allow_all_methods=True)
 
-api = falcon.API(middleware=[cors_allow_all.middleware])
+api = falcon.API(middleware=[ MultipartMiddleware(), cors_allow_all.middleware])
 api.req_options.auto_parse_form_urlencoded = True
 api.add_route('/transaction', TransactionsHandler())
 api.add_route('/block/all', BlockChainHandler())
