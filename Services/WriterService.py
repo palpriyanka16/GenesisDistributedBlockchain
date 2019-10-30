@@ -2,13 +2,12 @@
 
 import json
 import os
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from Models import Block
 from Services.NetworkService import NetworkService
 from Services.TransactionsPoolingService import TransactionsPoolingService
-# from ..TransactionListener import mine_transactions
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 network_service = NetworkService.get_instance()
 transactions_pooling_service = TransactionsPoolingService.get_instance()
