@@ -72,7 +72,7 @@ class NetworkService:
         logging.info("Sending block for mining to " + url)
 
         try:
-            requests.post(url=url, json=data, timeout=0.0000000001)
+            requests.post(url=url, json=data, timeout=0.5)
         except requests.exceptions.ReadTimeout:
             pass
 
@@ -86,7 +86,7 @@ class NetworkService:
         }
 
         try:
-            requests.post(url=url, json=data, timeout=0.0000000001)
+            requests.post(url=url, json=data, timeout=0.5)
         except requests.exceptions.ReadTimeout:
             pass
 
