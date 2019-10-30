@@ -91,11 +91,10 @@ class PoolMiningService:
         }
 
     def send_next_nonce_range(self, to, block_hash):
-        logging.info("\n\n\n")
         if block_hash != self.cur_block_in_buffer["block_hash"]:
             logging.info(block_hash)
             logging.info(self.cur_block_in_buffer["block_hash"])
-            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
+            logging.error("block_hash not equal to hash in buffer...")
             return
 
         block_with_nonce_range = {
@@ -108,11 +107,10 @@ class PoolMiningService:
         self.cur_nonce_start_value += self.NONCE_RANGE_PER_NODE
 
     def validate_and_add_block(self, nonce, block_hash):
-        logging.info("\n\n\n")
         if block_hash != self.cur_block_in_buffer["block_hash"]:
             logging.info(block_hash)
             logging.info(self.cur_block_in_buffer["block_hash"])
-            logging.error("block_hash not equal to hash in buffer...\n\n\n\n")
+            logging.error("block_hash not equal to hash in buffer...")
             return
 
         block_data = self.cur_block_in_buffer["block_data_without_nonce"] + str(nonce)

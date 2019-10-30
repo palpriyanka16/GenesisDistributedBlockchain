@@ -62,11 +62,9 @@ class DataNodeMiningService:
                     self.master_address
                 )
 
-                # print(bin(int(block_data_hash, 16))[2:].zfill(len(block_data_hash) * 4))
                 break
             nonce += 1
 
         # Ideally, we should shuffle the transactions and repeat the process till we get a valid nonce
         if valid_nonce == -1:
             self.network_service.inform_master_nonce_not_in_range(block_hash_without_nonce, self.master_address)
-            # raise Exception("Couldn't find a valid nonce for the data.")

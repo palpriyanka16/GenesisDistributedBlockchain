@@ -207,7 +207,3 @@ api.add_route('/block/all', BlockChainHandler())
 api.add_route('/block', BlocksHandler())
 api.add_route('/block/mine', BlockMiningHandler())
 api.add_route('/block/nonce', BlockNonceListener())
-
-# httpd = simple_server.make_server('127.0.0.1', 8000, api)
-# print("Listening for newer transactions on http://localhost:8000/transaction")
-# httpd.serve_forever()
